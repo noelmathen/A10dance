@@ -1,0 +1,10 @@
+virtual_env
+CSBS_2021-2025.xlsx
+CSBS_2021-2025_Attendance.xlsx
+CSBS_2021-2025_NumberofHours.xlsx
+.env
+db.sqlite3
+staticfiles/
+media/
+*.pyc
+__pycache__/
