@@ -120,6 +120,8 @@ LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'Asia/Kolkata'
 
+DATE_FORMAT = 'd-m-Y'
+
 USE_I18N = True
 
 USE_TZ = True
