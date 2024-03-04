@@ -44,7 +44,7 @@ def sort_dates(date_series):
 
 def main():
     # Read student details from Excel
-    student_details_df = pd.read_excel(r'C:\Users\noelm\Documents\PROJECTS\Know Your Attendance\CSBS_2021-2025.xlsx')
+    student_details_df = pd.read_excel(r'C:\Users\noelm\Documents\PROJECTS\A10dance\Other Files\CSBS_2021-2025.xlsx')
     print(student_details_df)
 
     # Fetch subjects details for the first student
@@ -66,8 +66,21 @@ def main():
         driver.find_element(By.NAME, "Userid").send_keys(student_row['UID'])
         driver.find_element(By.NAME, "Password").send_keys(student_row['Password'])
         driver.find_element(By.XPATH, "//input[@type='submit']").click()
+
+        #get studetns name
+        text_element = driver.find_element(By.XPATH, "//div[@class='scroller']")
+        text_content = text_element.text
+        index = text_content.find('Logged In User :')
+        student_name = text_content[index + len('Logged In User :'):].strip()
+        print("Student's Name:", student_name)
+
+        #get attendance
         driver.find_element(By.LINK_TEXT, "Attendance").click()
-        Select(driver.find_element(By.NAME, "code")).select_by_value("2024S6CU")
+
+        #get semester
+        Select(driver.find_element(By.NAME, "code")).select_by_index(1)
+        semester = Select(driver.find_element(By.NAME, "code")).first_selected_option.text.split('S')[1][0]
+        print("Semester:", semester)
         driver.find_element(By.XPATH, "//input[@value='SUBMIT']").click()
 
         # Scrape the attendance details for the current student
