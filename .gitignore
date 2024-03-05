@@ -8,3 +8,4 @@ staticfiles/
 media/
 *.pyc
 __pycache__/
+django.log

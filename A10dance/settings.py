@@ -149,3 +149,24 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 # Define the URL for serving media files during development
 MEDIA_URL = '/media/'
+
+
+# Define logging configuration
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'django.log'),  # Adjust the file path as needed
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
+    },
+}

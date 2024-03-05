@@ -21,6 +21,11 @@ def fetch_subject_details(username, password):
         # Navigate to the Sessional Marks page
         driver.find_element(By.LINK_TEXT, "Sessional Marks").click()
 
+        #get semester
+        Select(driver.find_element(By.NAME, "code")).select_by_index(0)
+        semester = Select(driver.find_element(By.NAME, "code")).first_selected_option.text.split('S')[1][0]
+        print("Semester:", semester)
+
         # Submit the form to fetch the subjects
         driver.find_element(By.XPATH, "//input[@value='SUBMIT']").click()
 
