@@ -15,9 +15,8 @@ class BranchAdminForm(forms.ModelForm):
     def save(self, commit=True):
         branch = super().save(commit=False)
         
-        # Check if a new Branch instance is being created
         if not branch.pk:
-            commit = True  # Ensure that the branch is saved to generate a primary key
+            commit = True
         
         if commit:
             branch.save()
@@ -26,9 +25,7 @@ class BranchAdminForm(forms.ModelForm):
         if excel_file:
             process_excel_file(branch, excel_file)
 
-        # Save many-to-many relationships if any
         self.save_m2m()
-
         return branch
 
 

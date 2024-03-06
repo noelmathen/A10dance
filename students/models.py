@@ -1,3 +1,4 @@
+#students/models.py
 from django.db import models
 from accounts.models import CustomUser
 from academia.models import Branch
@@ -8,3 +9,4 @@ class Students(models.Model):
 
     def __str__(self):
         return f"{self.user.first_name} - {self.branch_name} {self.division} - ({self.joining_year} - {self.passout_year})"
+    

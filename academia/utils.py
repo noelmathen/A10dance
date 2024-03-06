@@ -7,6 +7,7 @@ from selenium.webdriver.support.ui import Select
 from bs4 import BeautifulSoup
 from .models import Branch
 import logging
+from students.utils import insert_student_details
 
 logger = logging.getLogger(__name__)
 
@@ -74,5 +75,6 @@ def fetch_subject_details(branch_name, excel_file):
 
 def process_excel_file(branch, excel_file):
     fetch_subject_details(branch.branch_name, excel_file)
+    insert_student_details(branch.branch_name)
 
 
