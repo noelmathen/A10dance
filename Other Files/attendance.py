@@ -84,7 +84,7 @@ def main():
         driver.find_element(By.LINK_TEXT, "Attendance").click()
 
         #get semester
-        Select(driver.find_element(By.NAME, "code")).select_by_index(1)
+        Select(driver.find_element(By.NAME, "code")).select_by_index(0)
         semester = Select(driver.find_element(By.NAME, "code")).first_selected_option.text.split('S')[1][0]
         print("Semester:", semester)
         driver.find_element(By.XPATH, "//input[@value='SUBMIT']").click()
@@ -93,8 +93,25 @@ def main():
         table = driver.find_element(By.XPATH, "//table[@width='96%']")
         table_html = table.get_attribute("outerHTML")
         attendance_df = pd.read_html(StringIO(table_html))[0][1:].drop([1]).reset_index(drop=True)
+        print(f"{student_name}'s attendance:")
         print(attendance_df)
         print("\n")
+
+
+
+
+
+        # Calculate number of missing hours of each subejct for student
+        total_hours_lost_student = {subject: 0 for subject in subjects_df['Subject Code']}
+        for col in range(1, attendance_df.shape[1]):
+            for index, row in attendance_df.iterrows():
+                subject_code = row[col]
+                if pd.notna(subject_code):
+                    total_hours_lost_student[subject_code] = total_hours_lost_student.get(subject_code, 0) + 1
+        total_hours_lost_student_df = pd.DataFrame(list(total_hours_lost_student.items()), columns=['Subject Code', 'Total Hours Lost'])
+        print(f"{student_name}'s Number of hours lost:")
+        print(total_hours_lost_student_df)
+
 
         # Logout
         driver.find_element(By.LINK_TEXT, "Logout").click()
