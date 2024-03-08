@@ -50,47 +50,70 @@ def main():
     print("Semester:", semester)
     driver.find_element(By.XPATH, "//input[@value='SUBMIT']").click()
 
+
+
+
     # Scrape the attendance details for the current student
     table = driver.find_element(By.XPATH, "//table[@width='96%']")
     table_html = table.get_attribute("outerHTML")
     soup = BeautifulSoup(table_html, "html.parser")
-    attendance_df_with_duty = pd.read_html(StringIO(table_html))[0][1:].drop([1]).reset_index(drop=True)
+    attendance_df = pd.read_html(StringIO(table_html))[0][1:].drop([1]).reset_index(drop=True)
 
-    #Discard duty attendance because it doesnt contrivute to attendance percentage
-    rows = []
-    for row in soup.find_all('tr'):
-        cells = []
-        for cell in row.find_all(['td', 'th']):
+    # Extract duty attendance information and mark corresponding duty_hour columns as True
+    duty_hours = []
+    for row in soup.find_all('tr')[2:]:
+        cells = row.find_all(['td', 'th'])
+        duty_hours_row = [False] * 7  # Initialize all duty_hour columns to False for each row
+        for i, cell in enumerate(cells):
             if cell.has_attr('bgcolor') and cell['bgcolor'] == '#cccc00':
-                cells.append(np.nan)
-            else:
-                cells.append(cell.text.strip())
-        rows.append(cells)
+                duty_hours_row[i-1] = True
+        duty_hours.append(duty_hours_row)
 
-    # Convert the list of rows to a DataFrame
-    attendance_df_with_duty = pd.read_html(StringIO(table_html))[0][1:].drop([1]).reset_index(drop=True)
-    attendance_df = pd.DataFrame(rows[1:], columns=rows[0]).drop([0]).reset_index(drop=True)
-    attendance_df.columns = attendance_df_with_duty.columns
-    attendance_df.replace('', np.nan, inplace=True)
+    # Ensure the number of rows in the duty_hours list matches the number of rows in the attendance DataFrame
+    if len(duty_hours) != len(attendance_df):
+        # Adjust the length of the duty_hours list to match the number of rows in the attendance DataFrame
+        if len(duty_hours) > len(attendance_df):
+            duty_hours = duty_hours[:len(attendance_df)]
+        else:
+            # Append extra rows with default duty hour values (False) if necessary
+            extra_rows = len(attendance_df) - len(duty_hours)
+            for _ in range(extra_rows):
+                duty_hours.append([False] * 7)
 
-    print(f"{student_name}'s attendance:")
+    # Add duty attendance columns to the DataFrame with extracted duty hours
+    for i in range(1, 8):
+        column_name = f"duty_hour_{i}"
+        attendance_df[column_name] = [row[i-1] for row in duty_hours]
+
+    print(f"{student_name}'s attendance with duty hours:")
     print(attendance_df)
-    print(attendance_df_with_duty)
     print("\n")
 
 
+    # Calculate number of missing hours of each subject for student
+    total_hours_lost_student = {subject: {'With Duty': 0, 'Without Duty': 0} for subject in subjects_df['Subject Code']}
 
-
-    # Calculate number of missing hours of each subejct for student
-    total_hours_lost_student = {subject: 0 for subject in subjects_df['Subject Code']}
-    for col in range(1, attendance_df.shape[1]):
+    for column_name in attendance_df.columns[1:8]:  # Start from the second column
+        col_index = int(column_name)  # Convert column name to integer
         for index, row in attendance_df.iterrows():
-            subject_code = row[col]
+            subject_code = row[column_name]
+            duty_hour_col_name = f"duty_hour_{col_index}"
+            
+            # Count hours lost with duty
             if pd.notna(subject_code):
-                total_hours_lost_student[subject_code] = total_hours_lost_student.get(subject_code, 0) + 1
-    total_hours_lost_student_df = pd.DataFrame(list(total_hours_lost_student.items()), columns=['Subject Code', 'Total Hours Lost'])
+                total_hours_lost_student[subject_code]['With Duty'] += 1
+
+            # Count hours lost without duty
+            if pd.notna(subject_code) and not row[duty_hour_col_name]:
+                total_hours_lost_student[subject_code]['Without Duty'] += 1
+
+    # Convert the dictionary to a DataFrame
+    total_hours_lost_student_df = pd.DataFrame(total_hours_lost_student).transpose().reset_index()
+    total_hours_lost_student_df.columns = ['Subject Code', 'Total Hours Lost(With Duty)', 'Total Hours Lost(Without Duty)']
+
     print(f"{student_name}'s Number of hours lost:")
     print(total_hours_lost_student_df)
+
 
 
     # Logout
