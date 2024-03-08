@@ -56,7 +56,7 @@ class PercentageDetails(models.Model):
     hours_lost_with_duty = models.PositiveIntegerField(default=0)
     hours_lost_without_duty = models.PositiveIntegerField(default=0)
     percentage_of_subject = models.FloatField(default=100)
-    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, null=True)
 
     def __str__(self):
         return f"{self.student} - {self.student.branch.branch_name} - {self.course.course_name} - {self.percentage_of_subject}"
