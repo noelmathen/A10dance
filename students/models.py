@@ -8,5 +8,5 @@ class Students(models.Model):
     branch = models.ForeignKey(Branch, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"{self.user.first_name} - {self.branch_name} {self.division} - ({self.joining_year} - {self.passout_year})"
+        return f"{self.user.first_name} - {self.branch.branch_name} {self.branch.division} - ({self.branch.joining_year} - {self.branch.passout_year})"
     

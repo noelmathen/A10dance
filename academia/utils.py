@@ -7,7 +7,6 @@ from selenium.webdriver.support.ui import Select
 from bs4 import BeautifulSoup
 from .models import Branch
 import logging
-from students.utils import insert_student_details
 
 logger = logging.getLogger(__name__)
 
@@ -45,10 +44,10 @@ def fetch_subject_details(branch_name, excel_file):
         table = driver.find_element(By.XPATH, "//table[@width='50%']")
         table_html = table.get_attribute("outerHTML")
         soup = BeautifulSoup(table_html, "html.parser")
-        df = pd.read_html(str(soup), header=0)[0].iloc[:-1]
+        df = pd.read_html(str(soup), header=0)[0].iloc[:]
         df = df.rename(columns={"Code": "Subject Code"})
+        print(df)
         logger.info(df)
-
 
         # Assuming df is the DataFrame containing subject details
         courses = []
@@ -72,9 +71,7 @@ def fetch_subject_details(branch_name, excel_file):
         logger.error(f"Error fetching subjects: {e}")
 
 
-
 def process_excel_file(branch, excel_file):
     fetch_subject_details(branch.branch_name, excel_file)
-    insert_student_details(branch.branch_name)
 
 

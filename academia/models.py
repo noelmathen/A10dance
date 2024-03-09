@@ -14,7 +14,7 @@ class Branch(models.Model):
         ('AEI', 'AEI'),
     ]
     DIVISION_CHOICES = [
-        ('N/A', ''),
+        ('', 'N/A'),
         ('Alpha', 'Alpha'),
         ('Beta', 'Beta'),
         ('Gamma', 'Gamma'),
@@ -23,11 +23,11 @@ class Branch(models.Model):
     joining_year = models.PositiveIntegerField()
     passout_year = models.PositiveIntegerField()
     branch_name = models.CharField(max_length=100, choices=BRANCH_CHOICES) 
-    division = models.CharField(max_length=10, choices=DIVISION_CHOICES)
+    division = models.CharField(max_length=10, choices=DIVISION_CHOICES, blank=True)
     excel_file = models.FileField(upload_to='branch_excel_files', default=r'C:\Users\noelm\Documents\PROJECTS\A10dance\Other Files\CSBS_2021-2025.xlsx')
     
     def __str__(self):
-        return f"{self.branch_name} {self.division} ({self.joining_year - self.passout_year})"
+        return f"{self.branch_name} {self.division} ({self.joining_year} - {self.passout_year})"
     
     def save(self, *args, **kwargs):
         self.passout_year = self.joining_year + 4;

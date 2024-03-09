@@ -52,7 +52,7 @@ def sort_dates(date_series):
 def main():
     # Read student details from Excel
     student_details_df = pd.read_excel(r'C:\Users\noelm\Documents\PROJECTS\A10dance\Other Files\CSBS_2021-2025.xlsx')
-    print(student_details_df)
+    print(student_details_df) 
 
     # Fetch subjects details for the first student
     first_uid = str(student_details_df.loc[0, 'UID'])
@@ -89,12 +89,6 @@ def main():
         semester = Select(driver.find_element(By.NAME, "code")).first_selected_option.text.split('S')[1][0]
         print("Semester:", semester)
         driver.find_element(By.XPATH, "//input[@value='SUBMIT']").click()
-
-
-
-
-
-
 
         # Scrape the attendance details for the current student
         table = driver.find_element(By.XPATH, "//table[@width='96%']")
@@ -159,13 +153,6 @@ def main():
 
         print(f"{student_name}'s Number of hours lost:")
         print(total_hours_lost_student_df)
-
-
-
-
-
-
-
 
         # Logout
         driver.find_element(By.LINK_TEXT, "Logout").click()
