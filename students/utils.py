@@ -9,9 +9,11 @@ from io import StringIO
 import time
 from students.models import Students
 from accounts.models import CustomUser
-from academia.models import Branch
+from academia.models import Branch, Course
 from attendance.models import StudentAttendance, PercentageDetails, BranchHoursDetails
 from datetime import datetime
+from django.core.exceptions import ObjectDoesNotExist
+
 
 def insert_student_details(driver, student_row, branch):
     try:
@@ -43,6 +45,7 @@ def insert_student_details(driver, student_row, branch):
 
     except Exception as e:
         print(f"Error inserting student details: {e}")
+
 
 
 def insert_student_attendance_details(driver, student_row, branch):
@@ -92,16 +95,29 @@ def insert_student_attendance_details(driver, student_row, branch):
         for _, row in attendance_df.iterrows():
             date_str = row[0]
             date_obj = datetime.strptime(date_str, "%d-%b-%Y").date()
+            hours = []
+
+            for i in range(1, 8):
+                course_code = row[i]
+                if course_code and course_code != 'nan':  # Check if course code is present and not 'nan'
+                    try:
+                        course = Course.objects.get(course_code=course_code)
+                    except ObjectDoesNotExist:
+                        course = None
+                else:
+                    course = None
+                hours.append(course)
+
             student_attendance = StudentAttendance.objects.create(
                 student=student,
                 date=date_obj,
-                hour_1=row[1],
-                hour_2=row[2],
-                hour_3=row[3],
-                hour_4=row[4],
-                hour_5=row[5],
-                hour_6=row[6],
-                hour_7=row[7],
+                hour_1=hours[0],
+                hour_2=hours[1],
+                hour_3=hours[2],
+                hour_4=hours[3],
+                hour_5=hours[4],
+                hour_6=hours[5],
+                hour_7=hours[6],
                 duty_hour_1=row['duty_hour_1'],
                 duty_hour_2=row['duty_hour_2'],
                 duty_hour_3=row['duty_hour_3'],
@@ -114,11 +130,43 @@ def insert_student_attendance_details(driver, student_row, branch):
     
     except Exception as e:
         print(f"Error inserting student attendance details: {e}")
-    # student_attendance_df = attendance_df.iloc[:, 0:8]
+    student_attendance_df = attendance_df.iloc[:, 0:8]
     # print(student_attendance_df)
     # print("\n")
+    return student_attendance_df
 
 
+
+def update_branch_attendance(student_attendance_df, common_attendance_df, branch):
+    
+    return common_attendance_df
+    
+    
+    
+def get_course_object(course_code):
+    if pd.isnull(course_code):
+        return None
+    else:
+        return Course.objects.get(course_code=course_code)
+
+    
+def insert_branch_attendance(common_attendance_df, branch):
+    for _, row in common_attendance_df.iterrows():
+        date_str = row[0]
+        date_obj = datetime.strptime(date_str, "%d-%b-%Y").date()
+
+        branch_hours_details = BranchHoursDetails.objects.create(
+            branch=branch,
+            date=date_obj,
+            hour_1=get_course_object(row[1]),
+            hour_2=get_course_object(row[2]),
+            hour_3=get_course_object(row[3]),
+            hour_4=get_course_object(row[4]),
+            hour_5=get_course_object(row[5]),
+            hour_6=get_course_object(row[6]),
+            hour_7=get_course_object(row[7])
+        )
+        print(f"Branch hours details inserted: {branch_hours_details}")
 
 
 
@@ -137,23 +185,12 @@ def iterate_through_students(branch, excel_file):
         
         
         insert_student_details(driver, student_row, branch)
-        insert_student_attendance_details(driver, student_row, branch)
+        student_attendance_df = insert_student_attendance_details(driver, student_row, branch)
         
-
-        # #get studetns name
-        # text_element = driver.find_element(By.XPATH, "//div[@class='scroller']")
-        # text_content = text_element.text
-        # index = text_content.find('Logged In User :')
-        # student_name = text_content[index + len('Logged In User :'):].strip()
-        # print("Student's Name:", student_name)
-
-
-
-        # #get attendance
-        # driver.find_element(By.LINK_TEXT, "Attendance").click()
-
-        # #get semester
-        # Select(driver.find_element(By.NAME, "code")).select_by_index(0)
-        # semester = Select(driver.find_element(By.NAME, "code")).first_selected_option.text.split('S')[1][0]
-        # print("Semester:", semester)
-        # driver.find_element(By.XPATH, "//input[@value='SUBMIT']").click()
+        common_attendance_df = pd.concat([common_attendance_df, student_attendance_df], ignore_index=True)
+        common_attendance_df = common_attendance_df.groupby(common_attendance_df.columns[0]).apply(lambda x: x.ffill()).reset_index(drop=True)
+        common_attendance_df = common_attendance_df.drop_duplicates(subset=common_attendance_df.columns[0], keep='last').reset_index(drop=True)
+        # print(common_attendance_df)
+    
+    print(common_attendance_df)
+    insert_branch_attendance(common_attendance_df, branch)
