@@ -69,9 +69,11 @@ def fetch_subject_details(branch_name, excel_file):
 
     except Exception as e:
         logger.error(f"Error fetching subjects: {e}")
+        
+    return df
 
 
 def process_excel_file(branch, excel_file):
-    fetch_subject_details(branch.branch_name, excel_file)
-
+    subject_df=fetch_subject_details(branch.branch_name, excel_file)
+    return subject_df
 

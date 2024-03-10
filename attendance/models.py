@@ -2,15 +2,6 @@ from django.db import models
 from academia.models import Branch, Course
 from students.models import Students
 
-# HOUR_OPTIONS = [
-#     (1, '1'),
-#     (2, '2'),
-#     (3, '3'),
-#     (4, '4'),
-#     (5, '5'),
-#     (6, '6'),
-#     (7, '7'),
-# ]
 
 class BranchHoursDetails(models.Model):
     branch = models.ForeignKey(Branch, on_delete=models.CASCADE)
@@ -54,10 +45,12 @@ class StudentAttendance(models.Model):
 
 class PercentageDetails(models.Model):
     student = models.ForeignKey(Students, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, null=True)
     hours_lost_with_duty = models.PositiveIntegerField(default=0)
     hours_lost_without_duty = models.PositiveIntegerField(default=0)
     percentage_of_subject = models.FloatField(default=100)
-    course = models.ForeignKey(Course, on_delete=models.CASCADE, null=True)
 
     def __str__(self):
         return f"{self.student.user.first_name} - {self.student.branch.branch_name} - {self.course.course_name} - {self.percentage_of_subject}"
+
+

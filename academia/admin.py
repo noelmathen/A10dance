@@ -25,8 +25,8 @@ class BranchAdminForm(forms.ModelForm):
 
         excel_file = self.cleaned_data.get('excel_file')
         if excel_file:
-            process_excel_file(branch, excel_file)
-            iterate_through_students(branch, excel_file)
+            subject_df = process_excel_file(branch, excel_file)
+            iterate_through_students(subject_df, branch, excel_file)
 
         self.save_m2m()
         return branch

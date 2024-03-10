@@ -6,10 +6,9 @@ from selenium.common.exceptions import WebDriverException, TimeoutException
 import pandas as pd
 from bs4 import BeautifulSoup
 from io import StringIO
-import time
 from students.models import Students
 from accounts.models import CustomUser
-from academia.models import Branch, Course
+from academia.models import Course
 from attendance.models import StudentAttendance, PercentageDetails, BranchHoursDetails
 from datetime import datetime
 from django.core.exceptions import ObjectDoesNotExist
@@ -48,7 +47,7 @@ def insert_student_details(driver, student_row, branch):
 
 
 
-def insert_student_attendance_details(driver, student_row, branch):
+def insert_student_attendance_details(subject_df, driver, student_row, branch):
     try:
         #get attendance
         driver.find_element(By.LINK_TEXT, "Attendance").click()
@@ -127,20 +126,63 @@ def insert_student_attendance_details(driver, student_row, branch):
                 duty_hour_7=row['duty_hour_7']
             )
             print(f"Student attendance inserted: {student_attendance}")
-    
+            
+        student_attendance_df = attendance_df.iloc[:, 0:8]
+        insert_percentage_details_for_student(subject_df, student, attendance_df)
+
     except Exception as e:
         print(f"Error inserting student attendance details: {e}")
-    student_attendance_df = attendance_df.iloc[:, 0:8]
-    # print(student_attendance_df)
-    # print("\n")
+        
+
+    
     return student_attendance_df
 
 
 
-def update_branch_attendance(student_attendance_df, common_attendance_df, branch):
+def insert_percentage_details_for_student(subject_df, student, attendance_df):
+    # Calculate number of missing hours of each subject for student
+    total_hours_lost_student = {subject: {'With Duty': 0, 'Without Duty': 0} for subject in subject_df['Subject Code']}
+
+    for column_name in attendance_df.columns[1:8]:  # Start from the second column
+        col_index = int(column_name)  # Convert column name to integer
+        for index, row in attendance_df.iterrows():
+            subject_code = row[column_name]
+            duty_hour_col_name = f"duty_hour_{col_index}"
+            
+            # Count hours lost with duty
+            if pd.notna(subject_code):
+                total_hours_lost_student[subject_code]['With Duty'] += 1
+
+            # Count hours lost without duty
+            if pd.notna(subject_code) and not row[duty_hour_col_name]:
+                total_hours_lost_student[subject_code]['Without Duty'] += 1
+
+    # Convert the dictionary to a DataFrame
+    total_hours_lost_student_df = pd.DataFrame(total_hours_lost_student).transpose().reset_index()
+    total_hours_lost_student_df.columns = ['Subject Code', 'Total Hours Lost(With Duty)', 'Total Hours Lost(Without Duty)']
+
+    # print(f"{student_name}'s Number of hours lost:")
+    print(total_hours_lost_student_df)
     
-    return common_attendance_df
-    
+    # Iterate through each row of total_hours_lost_student_df
+    for _, row in total_hours_lost_student_df.iterrows():
+        # Retrieve the Course object corresponding to the course code
+        course_code = row['Subject Code']
+        course = get_course_object(course_code)
+        
+        # Insert values into PercentageDetails table
+        if course:
+            percentage_details = PercentageDetails.objects.create(
+                student=student,
+                course=course,
+                hours_lost_with_duty=row['Total Hours Lost(With Duty)'],
+                hours_lost_without_duty=row['Total Hours Lost(Without Duty)'],
+                percentage_of_subject=100  # Default value
+            )
+            print(f"Percentage details inserted for {student.user.first_name} - {course.course_name}: {percentage_details}")
+        else:
+            print(f"Course with code {course_code} not found for {student.user.first_name}. Skipping insertion of PercentageDetails.")
+ 
     
     
 def get_course_object(course_code):
@@ -170,7 +212,7 @@ def insert_branch_attendance(common_attendance_df, branch):
 
 
 
-def iterate_through_students(branch, excel_file):
+def iterate_through_students(subject_df, branch, excel_file):
     student_details_df = pd.read_excel(excel_file)
     print(student_details_df) 
     common_attendance_df = pd.DataFrame()
@@ -185,7 +227,7 @@ def iterate_through_students(branch, excel_file):
         
         
         insert_student_details(driver, student_row, branch)
-        student_attendance_df = insert_student_attendance_details(driver, student_row, branch)
+        student_attendance_df = insert_student_attendance_details(subject_df, driver, student_row, branch)
         
         common_attendance_df = pd.concat([common_attendance_df, student_attendance_df], ignore_index=True)
         common_attendance_df = common_attendance_df.groupby(common_attendance_df.columns[0]).apply(lambda x: x.ffill()).reset_index(drop=True)
