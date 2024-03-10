@@ -125,8 +125,8 @@ def main():
         print(f"{student_name}'s attendance with duty hours:")
         print(attendance_df)
         student_attendance_df = attendance_df.iloc[:, 0:8]
-        # print(student_attendance_df)
-    
+        print(student_attendance_df)
+
         print("\n")
 
 

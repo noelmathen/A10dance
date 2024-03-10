@@ -46,8 +46,7 @@ class StudentAttendance(models.Model):
 
 
     def __str__(self):
-        return f"{self.student} - {self.date}"
-
+        return f"{self.student.user.first_name} - {self.date}"
 
 
 
@@ -59,4 +58,4 @@ class PercentageDetails(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE, null=True)
 
     def __str__(self):
-        return f"{self.student} - {self.student.branch.branch_name} - {self.course.course_name} - {self.percentage_of_subject}"
+        return f"{self.student.user.first_name} - {self.student.branch.branch_name} - {self.course.course_name} - {self.percentage_of_subject}"

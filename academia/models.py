@@ -1,5 +1,8 @@
 #acedmia/models.py
 from django.db import models
+from django.dispatch import receiver
+from students.models import Students
+
 
 class Branch(models.Model):
     BRANCH_CHOICES = [
@@ -32,7 +35,16 @@ class Branch(models.Model):
     def save(self, *args, **kwargs):
         self.passout_year = self.joining_year + 4;
         super().save(*args, **kwargs)
-
+        
+    def delete(self, *args, **kwargs):
+        """
+        Override the delete method to delete associated Students and CustomUser objects.
+        """
+        students = self.students_set.all()
+        for student in students:
+            student.delete()
+        super().delete(*args, **kwargs)
+        
 
 class Course(models.Model):
     course_code = models.CharField(max_length=20)
