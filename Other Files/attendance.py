@@ -35,7 +35,7 @@ def fetch_subject_details(username, password):
         table = driver.find_element(By.XPATH, "//table[@width='50%']")
         table_html = table.get_attribute("outerHTML")
         soup = BeautifulSoup(table_html, "html.parser")
-        df = pd.read_html(str(soup), header=0)[0].iloc[:]
+        df = pd.read_html(StringIO(table_html), header=0)[0].iloc[:]
         df = df.rename(columns={"Code": "Subject Code"})
 
         return df
@@ -179,24 +179,24 @@ def main():
     # Print the ordered DataFrame
     print(common_attendance_df)
 
+
+
     # Calculate total hours lost for each subject
-    total_hours_lost = {subject: 0 for subject in subjects_df['Subject Code']}
+    total_hours = {subject: 0 for subject in subjects_df['Subject Code']}
 
     for col in range(1, common_attendance_df.shape[1]):
         for index, row in common_attendance_df.iterrows():
             subject_code = row[col]
             if pd.notna(subject_code):
-                total_hours_lost[subject_code] = total_hours_lost.get(subject_code, 0) + 1
+                total_hours[subject_code] = total_hours.get(subject_code, 0) + 1
 
     # Create a DataFrame from the total hours lost dictionary
-    total_hours_lost_df = pd.DataFrame(list(total_hours_lost.items()), columns=['Subject Code', 'Total Hours'])
+    total_hours_df = pd.DataFrame(list(total_hours.items()), columns=['Subject Code', 'Total Hours'])
 
-    # Merge subjects_df and total_hours_lost_df to get the final result
-    result_df = pd.merge(subjects_df, total_hours_lost_df, on='Subject Code', how='left')
-
-    # Fill NaN values with 0
-    # result_df['Total Hours Lost'] = result_df['Total Hours'].fillna(0).astype(int)
+    # Merge subjects_df and total_hours_df to get the final result
+    result_df = pd.merge(subjects_df, total_hours_df, on='Subject Code', how='left')
     print(result_df)
+
 
     # Write to Excel files
     common_attendance_df.to_excel('CSBS_2021-2025_Attendance.xlsx', index=False)

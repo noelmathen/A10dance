@@ -7,6 +7,7 @@ from selenium.webdriver.support.ui import Select
 from bs4 import BeautifulSoup
 from .models import Branch
 import logging
+from io import StringIO
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +45,7 @@ def fetch_subject_details(branch_name, excel_file):
         table = driver.find_element(By.XPATH, "//table[@width='50%']")
         table_html = table.get_attribute("outerHTML")
         soup = BeautifulSoup(table_html, "html.parser")
-        df = pd.read_html(str(soup), header=0)[0].iloc[:]
+        df = pd.read_html(StringIO(table_html), header=0)[0].iloc[:]
         df = df.rename(columns={"Code": "Subject Code"})
         print(df)
         logger.info(df)

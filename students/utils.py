@@ -25,7 +25,7 @@ def insert_student_details(driver, student_row, branch):
         uid = str(student_row['UID'])
         password = str(student_row['Password'])
         email = str(str(uid) + '@rajagiri.edu.in')
-        print(f"{name}' - {uid} - {password} - {email}")
+        print(f"\n{name}' - {uid} - {password} - {email}")
 
         if not Students.objects.filter(user__username=uid).exists():
             user = CustomUser.objects.create_user(
@@ -38,12 +38,12 @@ def insert_student_details(driver, student_row, branch):
                 user=user,
                 branch_id=branch.id
             )
-            print(f"Student details inserted: {student}")
+            print(f"\nStudent details inserted: {student}")
         else:
-            print(f"Student with UID {uid} already exists in the database.")
+            print(f"\nStudent with UID {uid} already exists in the database.")
 
     except Exception as e:
-        print(f"Error inserting student details: {e}")
+        print(f"\nError inserting student details: {e}")
 
 
 
@@ -125,16 +125,14 @@ def insert_student_attendance_details(subject_df, driver, student_row, branch):
                 duty_hour_6=row['duty_hour_6'],
                 duty_hour_7=row['duty_hour_7']
             )
-            print(f"Student attendance inserted: {student_attendance}")
+            print(f"\nStudent attendance inserted: {student_attendance}")
             
         student_attendance_df = attendance_df.iloc[:, 0:8]
         insert_percentage_details_for_student(subject_df, student, attendance_df)
 
     except Exception as e:
-        print(f"Error inserting student attendance details: {e}")
-        
+        print(f"\nError inserting student attendance details: {e}")
 
-    
     return student_attendance_df
 
 
@@ -179,9 +177,9 @@ def insert_percentage_details_for_student(subject_df, student, attendance_df):
                 hours_lost_without_duty=row['Total Hours Lost(Without Duty)'],
                 percentage_of_subject=100  # Default value
             )
-            print(f"Percentage details inserted for {student.user.first_name} - {course.course_name}: {percentage_details}")
+            print(f"\nPercentage details inserted for {student.user.first_name} - {course.course_name}: {percentage_details}")
         else:
-            print(f"Course with code {course_code} not found for {student.user.first_name}. Skipping insertion of PercentageDetails.")
+            print(f"\nCourse with code {course_code} not found for {student.user.first_name}. Skipping insertion of PercentageDetails.")
  
     
     
@@ -208,9 +206,37 @@ def insert_branch_attendance(common_attendance_df, branch):
             hour_6=get_course_object(row[6]),
             hour_7=get_course_object(row[7])
         )
-        print(f"Branch hours details inserted: {branch_hours_details}")
+        print(f"\nBranch hours details inserted: {branch_hours_details}")
 
 
+
+def update_course_number_of_hours(subject_df, common_attendance_df):
+    # Calculate total hours lost for each subject
+    total_hours = {subject: 0 for subject in subject_df['Subject Code']}
+
+    for col in range(1, common_attendance_df.shape[1]):
+        for index, row in common_attendance_df.iterrows():
+            subject_code = row[col]
+            if pd.notna(subject_code):
+                total_hours[subject_code] = total_hours.get(subject_code, 0) + 1
+
+    # Create a DataFrame from the total hours lost dictionary
+    total_hours_df = pd.DataFrame(list(total_hours.items()), columns=['Subject Code', 'Total Hours'])
+
+    # Merge subject_df and total_hours_df to get the final result
+    result_df = pd.merge(subject_df, total_hours_df, on='Subject Code', how='left')
+    print(result_df)
+
+    for _, row in result_df.iterrows():
+        course_code = row['Subject Code']
+        total_hours = row['Total Hours']
+        try:
+            course = Course.objects.get(course_code=course_code)
+            course.number_of_hours = total_hours
+            course.save()
+            print(f"\nUpdated number_of_hours for {course_code} to {total_hours}")
+        except Exception as e:
+            print(f"\nCourse number of hours updation error!")
 
 def iterate_through_students(subject_df, branch, excel_file):
     student_details_df = pd.read_excel(excel_file)
@@ -218,13 +244,11 @@ def iterate_through_students(subject_df, branch, excel_file):
     common_attendance_df = pd.DataFrame()
     driver = webdriver.Chrome()
 
-
     for _, student_row in student_details_df.iterrows():
         driver.get("https://www.rajagiritech.ac.in/stud/ktu/student/")
         driver.find_element(By.NAME, "Userid").send_keys(student_row['UID'])
         driver.find_element(By.NAME, "Password").send_keys(student_row['Password'])
         driver.find_element(By.XPATH, "//input[@type='submit']").click()
-        
         
         insert_student_details(driver, student_row, branch)
         student_attendance_df = insert_student_attendance_details(subject_df, driver, student_row, branch)
@@ -232,7 +256,8 @@ def iterate_through_students(subject_df, branch, excel_file):
         common_attendance_df = pd.concat([common_attendance_df, student_attendance_df], ignore_index=True)
         common_attendance_df = common_attendance_df.groupby(common_attendance_df.columns[0]).apply(lambda x: x.ffill()).reset_index(drop=True)
         common_attendance_df = common_attendance_df.drop_duplicates(subset=common_attendance_df.columns[0], keep='last').reset_index(drop=True)
-        # print(common_attendance_df)
-    
-    print(common_attendance_df)
+
+    # print(common_attendance_df)
     insert_branch_attendance(common_attendance_df, branch)
+    update_course_number_of_hours(subject_df, common_attendance_df)
+    
