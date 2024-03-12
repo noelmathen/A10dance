@@ -129,11 +129,12 @@ def insert_student_attendance_details(subject_df, driver, student_row, branch):
             
         student_attendance_df = attendance_df.iloc[:, 0:8]
         insert_percentage_details_for_student(subject_df, student, attendance_df)
+        
+        return student_attendance_df
 
     except Exception as e:
         print(f"\nError inserting student attendance details: {e}")
 
-    return student_attendance_df
 
 
 

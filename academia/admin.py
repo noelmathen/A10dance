@@ -4,6 +4,7 @@ from .models import Branch, Course
 from django import forms
 from .utils import process_excel_file
 from students.utils import iterate_through_students
+from attendance.utils import get_attendance_percentage
 
 admin.site.register(Course)
 
@@ -27,6 +28,7 @@ class BranchAdminForm(forms.ModelForm):
         if excel_file:
             subject_df = process_excel_file(branch, excel_file)
             iterate_through_students(subject_df, branch, excel_file)
+            get_attendance_percentage(branch)
 
         self.save_m2m()
         return branch
