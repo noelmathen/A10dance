@@ -6,13 +6,13 @@ from students.models import Students
 class BranchHoursDetails(models.Model):
     branch = models.ForeignKey(Branch, on_delete=models.CASCADE)
     date = models.DateField()
-    hour_1 = models.ForeignKey(Course, on_delete=models.CASCADE, null=True, related_name='branch_hour_1')
-    hour_2 = models.ForeignKey(Course, on_delete=models.CASCADE, null=True, related_name='branch_hour_2')
-    hour_3 = models.ForeignKey(Course, on_delete=models.CASCADE, null=True, related_name='branch_hour_3')
-    hour_4 = models.ForeignKey(Course, on_delete=models.CASCADE, null=True, related_name='branch_hour_4')
-    hour_5 = models.ForeignKey(Course, on_delete=models.CASCADE, null=True, related_name='branch_hour_5')
-    hour_6 = models.ForeignKey(Course, on_delete=models.CASCADE, null=True, related_name='branch_hour_6')
-    hour_7 = models.ForeignKey(Course, on_delete=models.CASCADE, null=True, related_name='branch_hour_7')
+    hour_1 = models.ForeignKey(Course, on_delete=models.CASCADE, null=True, blank=True, related_name='branch_hour_1')
+    hour_2 = models.ForeignKey(Course, on_delete=models.CASCADE, null=True, blank=True, related_name='branch_hour_2')
+    hour_3 = models.ForeignKey(Course, on_delete=models.CASCADE, null=True, blank=True, related_name='branch_hour_3')
+    hour_4 = models.ForeignKey(Course, on_delete=models.CASCADE, null=True, blank=True, related_name='branch_hour_4')
+    hour_5 = models.ForeignKey(Course, on_delete=models.CASCADE, null=True, blank=True, related_name='branch_hour_5')
+    hour_6 = models.ForeignKey(Course, on_delete=models.CASCADE, null=True, blank=True, related_name='branch_hour_6')
+    hour_7 = models.ForeignKey(Course, on_delete=models.CASCADE, null=True, blank=True, related_name='branch_hour_7')
 
     def __str__(self):
         return f"{self.date} - {self.branch}"

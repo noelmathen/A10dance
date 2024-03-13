@@ -6,7 +6,6 @@ from .utils import process_excel_file
 from students.utils import iterate_through_students
 from attendance.utils import get_attendance_percentage
 
-admin.site.register(Course)
 
 class BranchAdminForm(forms.ModelForm):
     excel_file = forms.FileField(label='Excel File')
@@ -37,3 +36,10 @@ class BranchAdminForm(forms.ModelForm):
 @admin.register(Branch)
 class BranchAdmin(admin.ModelAdmin):
     form = BranchAdminForm
+
+
+@admin.register(Course)
+class CourseAdmin(admin.ModelAdmin):
+    list_display = ['course_name', 'course_code', 'number_of_hours', 'branch']
+    list_filter = ['branch']
+    ordering = ['branch', 'course_code']

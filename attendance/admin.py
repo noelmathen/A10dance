@@ -5,7 +5,7 @@ from .models import BranchHoursDetails, PercentageDetails, StudentAttendance
 
 @admin.register(BranchHoursDetails)
 class BranchHoursDetailsAdmin(admin.ModelAdmin):
-    list_display = ['branch', 'date']  # Display these fields in the admin list
+    list_display = ['branch', 'date', 'hour_1', 'hour_2', 'hour_3', 'hour_4', 'hour_5', 'hour_6', 'hour_7']  # Display these fields in the admin list
     ordering = ['branch', 'date']  # Order by the 'date' field in ascending order
     list_filter = ['branch', 'date']
     search_fields = ['branch', 'date']
