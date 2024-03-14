@@ -34,23 +34,23 @@ class BranchAdminForm(forms.ModelForm):
         return branch
 
 
-# # To update attendance details(in the dropdown of branch model)
-# def update_attendance_action(modeladmin, request, queryset):
-#     for branch in queryset:
-#         try:
-#             update_attendance_details(branch)
-#             messages.success(request, f"Attendance details updated successfully for {branch.branch_name}.")
-#         except Exception as e:
-#             messages.error(request, f"Failed to update attendance details for {branch.branch_name}: {e}")
+# To update attendance details(in the dropdown of branch model)
+def update_attendance_action(modeladmin, request, queryset):
+    for branch in queryset:
+        try:
+            update_attendance_details(branch)
+            messages.success(request, f"Attendance details updated successfully for {branch.branch_name}.")
+        except Exception as e:
+            messages.error(request, f"Failed to update attendance details for {branch.branch_name}: {e}")
 
-# update_attendance_action.short_description = "Update Attendance Details"  # Action display name
+update_attendance_action.short_description = "Update Attendance Details"  # Action display name
  
 
 @admin.register(Branch)
 class BranchAdmin(admin.ModelAdmin):
     form = BranchAdminForm
     list_display = ['branch_name', 'joining_year', 'passout_year', 'division']
-    # actions = [update_attendance_action]
+    actions = [update_attendance_action]
 
 
 @admin.register(Course)
