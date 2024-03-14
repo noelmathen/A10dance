@@ -1,10 +1,11 @@
 #academia/admin.py
-from django.contrib import admin
+from django.contrib import admin, messages
 from .models import Branch, Course
 from django import forms
 from .utils import process_excel_file
 from students.utils import iterate_through_students
 from attendance.utils import get_attendance_percentage
+from attendance.update_attendance import update_attendance_details
 
 
 class BranchAdminForm(forms.ModelForm):
@@ -33,9 +34,23 @@ class BranchAdminForm(forms.ModelForm):
         return branch
 
 
+# # To update attendance details(in the dropdown of branch model)
+# def update_attendance_action(modeladmin, request, queryset):
+#     for branch in queryset:
+#         try:
+#             update_attendance_details(branch)
+#             messages.success(request, f"Attendance details updated successfully for {branch.branch_name}.")
+#         except Exception as e:
+#             messages.error(request, f"Failed to update attendance details for {branch.branch_name}: {e}")
+
+# update_attendance_action.short_description = "Update Attendance Details"  # Action display name
+ 
+
 @admin.register(Branch)
 class BranchAdmin(admin.ModelAdmin):
     form = BranchAdminForm
+    list_display = ['branch_name', 'joining_year', 'passout_year', 'division']
+    # actions = [update_attendance_action]
 
 
 @admin.register(Course)
@@ -43,3 +58,5 @@ class CourseAdmin(admin.ModelAdmin):
     list_display = ['course_name', 'course_code', 'number_of_hours', 'branch']
     list_filter = ['branch']
     ordering = ['branch', 'course_code']
+    
+    

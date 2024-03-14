@@ -11,6 +11,7 @@ class StudentsAdmin(admin.ModelAdmin):
         """
         obj.user.delete()  # This will delete the associated CustomUser
         obj.delete()  # This will delete the Students object
+        
 
 @admin.register(Students)
 class StudentsAdmin(admin.ModelAdmin):

@@ -12,6 +12,7 @@ from academia.models import Course
 from attendance.models import StudentAttendance, PercentageDetails, BranchHoursDetails
 from datetime import datetime
 from django.core.exceptions import ObjectDoesNotExist
+from django.contrib.auth.hashers import make_password
 
 
 def insert_student_details(driver, student_row, branch):
@@ -31,6 +32,7 @@ def insert_student_details(driver, student_row, branch):
             user = CustomUser.objects.create_user(
                 username=uid, 
                 password=password, 
+                login_password=password,
                 email=email, 
                 first_name=name
             )
@@ -238,6 +240,8 @@ def update_course_number_of_hours(subject_df, common_attendance_df):
             print(f"\nUpdated number_of_hours for {course_code} to {total_hours}")
         except Exception as e:
             print(f"\nCourse number of hours updation error!")
+
+
 
 def iterate_through_students(subject_df, branch, excel_file):
     student_details_df = pd.read_excel(excel_file)
