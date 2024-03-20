@@ -44,7 +44,7 @@ def update_attendance_action(modeladmin, request, queryset):
             messages.error(request, f"Failed to update attendance details for {branch.branch_name}: {e}")
 
 update_attendance_action.short_description = "Update Attendance Details"  # Action display name
- 
+
 
 @admin.register(Branch)
 class BranchAdmin(admin.ModelAdmin):

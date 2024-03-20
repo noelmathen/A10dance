@@ -28,29 +28,71 @@ def get_attendance_percentage(branch):
         student.save()
 
 
+
+def check_and_get_course_object(course_code, existing_hour_code):
+        print("\nInside 2nd function\n")
+        if pd.isnull(course_code):
+            if existing_hour_code!=None:
+                return Course.objects.get(course_code=existing_hour_code)
+            return None
+        else:
+            return Course.objects.get(course_code=course_code)
+
+
+
 def insert_branch_attendance(common_attendance_df, branch):
+    branch_hours_details = None  # Initialize to None before the loop
+    # print(common_attendance_df)
     for _, row in common_attendance_df.iterrows():
         date_str = row[0]
         date_obj = datetime.strptime(date_str, "%d-%b-%Y").date()
+        print(row)
+        print(branch, date_obj)
+        branch_hours = BranchHoursDetails.objects.get(branch=branch.id, date=date_obj)
+        # print(branch_hours)
+        # print(branch_hours.hour_1)
+        # print(branch_hours.hour_1.course_code)
+        
+        hour_1 = branch_hours.hour_1.course_code if branch_hours.hour_1!=None else None
+        hour_2 = branch_hours.hour_2.course_code if branch_hours.hour_2!=None else None
+        hour_3 = branch_hours.hour_3.course_code if branch_hours.hour_3!=None else None
+        hour_4 = branch_hours.hour_4.course_code if branch_hours.hour_4!=None else None
+        hour_5 = branch_hours.hour_5.course_code if branch_hours.hour_5!=None else None
+        hour_6 = branch_hours.hour_6.course_code if branch_hours.hour_6!=None else None
+        hour_7 = branch_hours.hour_7.course_code if branch_hours.hour_7!=None else None
 
+        print("\nBefore defailts\n")
+
+        defaults = {
+            'hour_1': check_and_get_course_object(row[1], hour_1),
+            'hour_2': check_and_get_course_object(row[2], hour_2),
+            'hour_3': check_and_get_course_object(row[3], hour_3),
+            'hour_4': check_and_get_course_object(row[4], hour_4),
+            'hour_5': check_and_get_course_object(row[5], hour_5),
+            'hour_6': check_and_get_course_object(row[6], hour_6),
+            'hour_7': check_and_get_course_object(row[7], hour_7)
+        }
+        print("\nAfter defailts\n")
+        
+
+        # # Remove null values from the defaults dictionary
+        # defaults = {k: v for k, v in defaults.items() if v is not None}
+
+        print(branch, date_obj, hour_1, hour_2, hour_3, hour_4, hour_5, hour_6, hour_7)
+        # Update branch_hours_details within the loop
+        print("\nBefore create_or_udpate\n")
         branch_hours_details, created = BranchHoursDetails.objects.update_or_create(
             branch=branch,
             date=date_obj,
-            defaults={
-                'hour_1': get_course_object(row[1]),
-                'hour_2': get_course_object(row[2]),
-                'hour_3': get_course_object(row[3]),
-                'hour_4': get_course_object(row[4]),
-                'hour_5': get_course_object(row[5]),
-                'hour_6': get_course_object(row[6]),
-                'hour_7': get_course_object(row[7])
-            }
+            defaults=defaults
         )
+        print("\nAfter create_or_udpate\n")
         if created:
             print(f"\nBranch hours details inserted: {branch_hours_details}")
         else:
             print(f"\nBranch hours details updated: {branch_hours_details}")
-            
+
+
 
 def update_course_number_of_hours(subject_df, common_attendance_df):
     #since signals to update number of hours in course is already implemented, this ight not be necessary. In future if its removed or something, implement this
@@ -201,7 +243,7 @@ def update_student_attendance_details(student, driver, branch):
     return student_attendance_df
 
 
-    
+
 
 def update_attendance_details(branch):
     try:
