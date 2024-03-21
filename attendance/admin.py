@@ -39,14 +39,24 @@ class BranchHoursDetailsAdmin(admin.ModelAdmin):
 class PercentageDetailsInline(admin.TabularInline):
     model = PercentageDetails
     extra = 0
-    field = ['course_name', 'hours_lost_with_duty', 'hours_lost_without_duty', 'percentage_of_subject']
+    fields = ['course_name', 'hours_lost_with_duty', 'hours_lost_without_duty', 'percentage_of_subject']
+    readonly_fields = fields  # Make all fields read-only
 
-    # def student_name(self, obj):
-    #     return obj.student.user.first_name
-    # student_name.short_description = 'Student Name'
+    def has_delete_permission(self, request, obj=None):
+        return False  # Disable delete permission for inline items
+
+    def __str__(self):
+        return self.course.course_name
+
+    def has_add_permission(self, request, obj):
+        return False  # Disable adding new PercentageDetails inline
+
+    def has_change_permission(self, request, obj=None):
+        return False  # Disable changing existing PercentageDetails inline
 
     def course_name(self, obj):
         return obj.course.course_name
+
     course_name.short_description = 'Course Name'
 
 
