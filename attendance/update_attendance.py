@@ -25,7 +25,11 @@ def get_attendance_percentage(branch):
             percentage_detail.percentage_of_subject = course_percentage
             percentage_detail.save()
             print(f"Attendance percentage for {student.user.first_name} for {percentage_detail.course.course_name}: {course_percentage}%")
+            print("okokok")
         student.save()
+        print("outside 2nd for loop")
+    print("outside 1st for loop")
+    
 
 
 
@@ -43,7 +47,10 @@ def check_and_get_course_object(course_code, existing_hour_code):
 def insert_branch_attendance(common_attendance_df, branch):
     for _, row in common_attendance_df.iterrows():
         date_obj = datetime.strptime(row[0], "%d-%b-%Y").date()
-        branch_hours = BranchHoursDetails.objects.get(branch=branch.id, date=date_obj)
+        try:
+            branch_hours = BranchHoursDetails.objects.get(branch=branch.id, date=date_obj)
+        except ObjectDoesNotExist:
+            print("BranchHoursDetails object does not exist for the specified branch and date.")
         defaults = {}
         
         for i in range(1, 8):

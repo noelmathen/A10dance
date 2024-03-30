@@ -14,7 +14,10 @@ def update_attendance_percentages_for_course_students(course):
             course_percentage = ((tot_hours - hours_lost) / tot_hours) * 100
             percentage_detail.percentage_of_subject = course_percentage
             percentage_detail.save()
+            print("before print")
             print(f"Attendance percentage for {student.user.first_name} for {course.course_name}: {course_percentage}%  (UPDATED)")
+            print("After print")
+        
         except PercentageDetails.DoesNotExist:
             print(f"No attendance percentage record found for {student.user.first_name} for {course.course_name}")
             
