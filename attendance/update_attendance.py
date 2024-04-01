@@ -46,16 +46,21 @@ def check_and_get_course_object(course_code, existing_hour_code):
 def insert_branch_attendance(common_attendance_df, branch):
     for _, row in common_attendance_df.iterrows():
         date_obj = datetime.strptime(row[0], "%d-%b-%Y").date()
+        
         try:
             branch_hours = BranchHoursDetails.objects.get(branch=branch.id, date=date_obj)
         except ObjectDoesNotExist:
             print("BranchHoursDetails object does not exist for the specified branch and date.")
+            # Create a dummy instance of BranchHoursDetails
+            branch_hours = BranchHoursDetails(branch=branch, date=date_obj)
+        
         defaults = {}
         
         for i in range(1, 8):
             hour_field = f"hour_{i}"
-            existing_hour_code = getattr(branch_hours, hour_field).course_code if getattr(branch_hours, hour_field) else None
-            defaults[hour_field] = check_and_get_course_object(row[i], existing_hour_code)
+            if hasattr(branch_hours, hour_field):  # Check if attribute exists
+                existing_hour_code = getattr(branch_hours, hour_field).course_code if getattr(branch_hours, hour_field) else None
+                defaults[hour_field] = check_and_get_course_object(row[i], existing_hour_code)
         
         branch_hours_details, created = BranchHoursDetails.objects.update_or_create(
             branch=branch,
