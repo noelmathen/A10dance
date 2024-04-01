@@ -14,7 +14,7 @@ class BranchHoursDetails(models.Model):
     hour_5 = models.ForeignKey(Course, on_delete=models.CASCADE, null=True, blank=True, related_name='branch_hour_5')
     hour_6 = models.ForeignKey(Course, on_delete=models.CASCADE, null=True, blank=True, related_name='branch_hour_6')
     hour_7 = models.ForeignKey(Course, on_delete=models.CASCADE, null=True, blank=True, related_name='branch_hour_7')
-    # null_values_intentional = models.BooleanField(default=False)    
+    finished_marking = models.BooleanField(default=False)    
     
     def __str__(self):
         return f"{self.date} - {self.branch}"

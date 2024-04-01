@@ -1,0 +1,27 @@
+{% extends "admin/change_list.html" %}
+
+{% block extrastyle %}
+  {{ block.super }}
+  <link rel="stylesheet" type="text/css" href="{% static 'css/branchhourdetail.css' %}">
+{% endblock %}
+
+{% block result_row %}
+  {% if original %}
+    {% if original|yesno:"yes,no" == "yes" or not any(item is None for item in items) %}
+      <tr>
+        {% for item, value in items %}
+          <td>{{ value }}</td>
+        {% endfor %}
+      </tr>
+    {% else %}
+      <tr class="colored-row">  {% for item, value in items %}
+          <td>{{ value }}</td>
+        {% endfor %}
+      </tr>
+    {% endif %}
+  {% endif %}
+{% endblock %}
+
+<head>
+  <script src="{% static 'js/branchhourdetail_change_list.js' %}"></script>
+</head>
