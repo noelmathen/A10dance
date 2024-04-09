@@ -18,3 +18,21 @@ class LoginView(APIView):
             return Response({'first_name':first_name, 'username':username, 'token': token.key}, status=status.HTTP_200_OK)
         else:
             return Response({'error': 'Invalid Credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+
+
+class LogoutView(APIView):
+    def post(self, request):
+        token = request.headers.get('Authorization').split()[1]
+        if token:
+            try:
+                token_obj = Token.objects.get(key=token)
+                user = token_obj.user
+                first_name = user.first_name
+                token_obj.delete()
+                return Response({'message': f'Logout successful for user: {first_name}'}, status=status.HTTP_200_OK)
+            except Token.DoesNotExist:
+                return Response({'error': 'Invalid token'}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({'error': 'Token missing'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        
