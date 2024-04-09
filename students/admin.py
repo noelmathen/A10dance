@@ -19,6 +19,3 @@ class StudentsAdmin(admin.ModelAdmin):
         obj.delete()  # This will delete the Students object
         
 
-
-    
-# admin.site.register(Students)

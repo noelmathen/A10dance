@@ -1,3 +1,4 @@
+#students/models.py
 from django.db import models
 from accounts.models import CustomUser
 
@@ -14,3 +15,5 @@ class Students(models.Model):
         """
         self.user.delete()
         super().delete(*args, **kwargs)
+
+

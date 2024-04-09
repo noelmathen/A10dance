@@ -17,3 +17,5 @@ def get_attendance_percentage(branch):
             percentage_detail.save()
             print(f"Attendance percentage for {student.user.first_name} for {percentage_detail.course.course_name}: {course_percentage}%")
         student.save()
+
+

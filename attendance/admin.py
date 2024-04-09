@@ -10,29 +10,7 @@ class BranchHoursDetailsAdmin(admin.ModelAdmin):
     list_filter = ['branch', 'date']
     search_fields = ['branch', 'date']
 
-# class BranchHoursDetailsInline(admin.TabularInline):
-#     model = BranchHoursDetails
-#     extra = 0
-#     field = ['branch', 'date', 'hour_1', 'hour_2', 'hour_3', 'hour_4', 'hour_5', 'hour_6', 'hour_7']
-    
-    
-    
-# @admin.register(BranchHoursDetailsModification)
-# class BranchHoursDetailsModificationAdmin(admin.ModelAdmin):
-#     list_display = ('branch_hours_details_info', 'modified_by_admin', 'modified_at')
-#     list_filter = ('modified_by_admin',)
-#     inlines = [BranchHoursDetailsInline]
-    
-#     def branch_hours_details_info(self, obj):
-#         return f"{obj.branch_hours_details.branch} - {obj.branch_hours_details.date}"
-#     branch_hours_details_info.short_description = 'Branch Hours Details'
-    
-    # def get_queryset(self, request):
-    #     queryset = super().get_queryset(request)
-    #     # Filter entries based on whether they are modified by admin or not
-    #     return queryset.filter(modified_by_admin=True) if request.GET.get('modified_by_admin') == 'True' else queryset.filter(modified_by_admin=False)
-    
-    
+
 
 class PercentageDetailsInline(admin.TabularInline):
     model = PercentageDetails

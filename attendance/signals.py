@@ -56,12 +56,4 @@ def update_course_number_of_hours(sender, instance, **kwargs):
         course.save(update_fields=['number_of_hours'])
         update_attendance_percentages_for_course_students(course)
         
-
-
-# @receiver(post_save, sender=BranchHoursDetails)
-# def create_branch_hours_details_modification(sender, instance, created, **kwargs):
-#     if created:
-#         if None in [getattr(instance, f'hour_{i}') for i in range(1, 8)]:
-#             BranchHoursDetailsModification.objects.create(branch_hours_details=instance)       
-            
         
