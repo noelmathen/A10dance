@@ -5,8 +5,11 @@ from rest_framework import status
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate
 from .serializers import UserSerializer
+from rest_framework.permissions import AllowAny
 
 class LoginView(APIView):
+    permission_classes = [AllowAny]
+    
     def post(self, request):
         username = request.data.get('username')
         password = request.data.get('password')
