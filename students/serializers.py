@@ -1,6 +1,6 @@
 #students/serializers.py
 from rest_framework import serializers
-from attendance.models import StudentAttendance, PercentageDetails
+from attendance.models import StudentAttendance, PercentageDetails, BranchHoursDetails
 
 
 
@@ -16,3 +16,12 @@ class AttendanceStatsSerializer(serializers.ModelSerializer):
         model = PercentageDetails
         fields = ['student', 'course', 'hours_lost_with_duty', 'hours_lost_without_duty', 'percentage_of_subject']
         
+
+
+class BranchHourDetailsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BranchHoursDetails
+        fields = ['branch', 'date', 'hour_1', 'hour_2', 'hour_3', 'hour_4', 'hour_5', 'hour_6', 'hour_7', 'finished_marking']
+    
+        
+
