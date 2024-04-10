@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'accounts',
     'attendance',
     'students',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -56,6 +57,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'A10dance.urls'
@@ -160,6 +162,16 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 # Define the URL for serving media files during development
 MEDIA_URL = '/media/'
+
+# STATIC_URL = '/static/'
+# STATICFILES_DIRS = [
+#     BASE_DIR / "static",
+# ]
+
+
+CORS_ALLOWED_ORIGINS = [
+    "http://127.0.0.1:5500",
+]
 
 
 # Define logging configuration
