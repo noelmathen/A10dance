@@ -38,9 +38,15 @@
 
 <body>
     <div class="attendance-container">
-        <div class="welcome-message">Welcome Noel<span id="username"></span></div>
-        <!-- Other attendance details can be added here -->
+        <div class="welcome-message">Welcome <span id="username"></span></div>
     </div>
+
+    <script>
+        const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
+        if (loggedInUser && loggedInUser.first_name) {
+            document.getElementById('username').textContent = loggedInUser.first_name;
+        }
+    </script>
 </body>
 
 </html>

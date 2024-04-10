@@ -109,53 +109,48 @@
     </div>
 
     <script>
-        document.getElementById('loginForm').addEventListener('submit', function(event) {
-            event.preventDefault(); // Prevent default form submission
-    
-            // Get form data
+        document.getElementById('loginForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+
             var formData = {
                 'username': document.getElementById('username').value,
                 'password': document.getElementById('password').value,
             };
-    
-            // Make AJAX request
+
             fetch('http://127.0.0.1:8000/api/login/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(formData),
-                })
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData),
+            })
                 .then(response => {
                     if (response.ok) {
-                        // If the response status is OK, parse and handle the JSON response
                         return response.json();
                     } else {
-                        // If the response status is not OK, handle the error and reject the promise
                         return response.json().then(errorData => Promise.reject(errorData));
                     }
                 })
                 .then(data => {
-                    // Log the response data to the console
                     console.log(data);
-                
-                    // Check if data contains the first_name field
+                    if (data.token) {
+                        localStorage.setItem('loggedInUser', JSON.stringify({
+                            first_name: data.first_name,
+                            username: data.username,
+                            token: data.token,
+                        }));
+                    }
+
                     if (data.first_name) {
-                        // Display the response message in a browser prompt
                         alert('Login Successful, Welcome ' + data.first_name);
-                        
-                        // Redirect to the attendance page after a successful login
+
                         window.location.href = 'attendance.html';
                     } else {
-                        // If first_name is not present in the response data, show an error alert
                         alert('Error: Unexpected response from the server.');
                     }
                 })
                 .catch(errorData => {
-                    // Handle the response for unsuccessful login
                     console.error('Error:', errorData);
-    
-                    // Display the error detail message in a browser prompt
                     alert('Incorrect credentials. Please try again.');
                 });
         });
