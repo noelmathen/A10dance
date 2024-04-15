@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>A10dance - Login</title>
-    <!-- <link rel="stylesheet" href="css/styles.css"> -->
+    <script src="./common.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -117,7 +117,7 @@
                 'password': document.getElementById('password').value,
             };
 
-            fetch('http://127.0.0.1:8000/api/login/', {
+            fetch(SERVER_URL + 'login/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
