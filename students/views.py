@@ -1,7 +1,17 @@
 #students/views.py
 from rest_framework import viewsets, permissions
-from attendance.models import StudentAttendance, PercentageDetails, BranchHoursDetails
-from .serializers import StudentAttendanceSerializer, AttendanceStatsSerializer, BranchHourDetailsSerializer 
+from attendance.models import (
+    StudentAttendance,
+    PercentageDetails,
+    BranchHoursDetails,
+)
+from .serializers import (
+    StudentAttendanceSerializer, 
+    AttendanceStatsSerializer, 
+    BranchHourDetailsSerializer,
+    CourseSerializer,
+)
+from academia.models import Course
 from rest_framework.generics import ListAPIView
 from .models import Students
 
@@ -32,5 +42,11 @@ class BranchHourDetailsView(ListAPIView):
         return BranchHoursDetails.objects.filter(branch=student.branch)
     
     
+class CourseTableView(ListAPIView):
+    serializer_class = CourseSerializer
+    permission_classes = [permissions.IsAuthenticated]
     
+    def get_queryset(self):
+        student = Students.objects.get(user=self.request.user)
+        return Course.objects.filter(branch=student.branch)
     
