@@ -14,7 +14,7 @@ from .serializers import (
 from academia.models import Course
 from rest_framework.generics import ListAPIView
 from .models import Students
-
+from datetime import datetime
 
 class StudentAttendanceListView(ListAPIView):
     serializer_class = StudentAttendanceSerializer
@@ -34,12 +34,25 @@ class AttendanceStatsView(ListAPIView):
     
     
 class BranchHourDetailsView(ListAPIView):
-    serializer_class =  BranchHourDetailsSerializer
+    serializer_class = BranchHourDetailsSerializer
     permission_classes = [permissions.IsAuthenticated]
     
     def get_queryset(self):
         student = Students.objects.get(user=self.request.user)
-        return BranchHoursDetails.objects.filter(branch=student.branch)
+        queryset = BranchHoursDetails.objects.filter(branch=student.branch)
+        return queryset.order_by('date')  # Sort entries by ascending order of dates
+    
+    def format_date(self, date):
+        # Convert date string to datetime object
+        date_obj = datetime.strptime(date, '%Y-%m-%d')
+        # Format date as "dd-Mon-YYYY (12-Feb-2024)"
+        return date_obj.strftime('%d-%b-%Y').replace(date_obj.strftime('%b').lower(), date_obj.strftime('%b'))
+
+    def list(self, request, *args, **kwargs):
+        response = super().list(request, *args, **kwargs)
+        for item in response.data:
+            item['date'] = self.format_date(item['date'])
+        return response
     
     
 class CourseTableView(ListAPIView):

@@ -54,6 +54,31 @@
         tr:hover {
             background-color: #f2f2f2;
         }
+
+        .attendance-button {
+            text-align: center;
+            margin-top: 20px; /* Adjust as needed */
+        }
+    
+        .attendance-button button {
+            background-color: #a831a8; /* Green */
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 10px;
+            transition-duration: 0.4s;
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+        }
+    
+        .attendance-button button:hover {
+            background-color: #ae0c86; /* Darker Green */
+        }
     </style>
 </head>
 
@@ -80,23 +105,6 @@
             </tbody>
         </table>
 
-
-        <br><br>
-        <div class="welcome-message">Course Table</div>
-        <table id="course-table">
-            <thead>
-                <tr>
-                    <th>Sl No</th>
-                    <th>Code</th>
-                    <th>Subject</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Course data will be inserted here dynamically -->
-            </tbody>
-        </table>
-
-
         <br><br>
         <div class="welcome-message">Percentage Details</div>
         <table id="attendance-details-table">
@@ -114,8 +122,10 @@
             </tbody>
         </table>
         </table>
+    </div>
 
-
+    <div class="attendance-button">
+        <button onclick="ViewClassAttendance()">View Class Attendance</button>
     </div>
 
     <script>
@@ -123,6 +133,7 @@
         if (loggedInUser && loggedInUser.first_name) {
             document.getElementById('username').textContent = loggedInUser.first_name;
         }
+
 
         // Fetch attendance data from backend API
         fetch(SERVER_URL + 'attendance-table/', {
@@ -157,42 +168,6 @@
             })
             .catch(error => console.error('Error fetching attendance data:', error));
 
-
-
-        // Fetch course data from backend API
-        fetch(SERVER_URL + 'course-table/', {
-            method: 'GET',
-            headers: {
-                'Authorization': `Token ${loggedInUser.token}`
-            }
-        })
-            .then(response => response.json())
-            .then(data => {
-                const tableBody = document.querySelector('#course-table tbody');
-
-                // Iterate over each course record and create table rows dynamically
-                data.forEach((course, index) => {
-                    const row = document.createElement('tr');
-
-                    // Add Sl No to the first cell
-                    const slNoCell = document.createElement('td');
-                    slNoCell.textContent = index + 1;
-                    row.appendChild(slNoCell);
-
-                    // Add course code to the second cell
-                    const codeCell = document.createElement('td');
-                    codeCell.textContent = course.course_code;
-                    row.appendChild(codeCell);
-
-                    // Add course name to the third cell
-                    const subjectCell = document.createElement('td');
-                    subjectCell.textContent = course.course_name;
-                    row.appendChild(subjectCell);
-
-                    tableBody.appendChild(row);
-                });
-            })
-            .catch(error => console.error('Error fetching course data:', error));
 
         // Fetch attendance details data from backend API
         fetch(SERVER_URL + 'attendance-stats/', {
@@ -239,6 +214,9 @@
             })
             .catch(error => console.error('Error fetching attendance details data:', error));
 
+            function ViewClassAttendance(){
+                window.location.href = "./branch_hour_details.html";
+            }
     </script>
 </body>
 
