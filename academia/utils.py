@@ -8,9 +8,10 @@ from bs4 import BeautifulSoup
 from .models import Branch
 import logging
 from io import StringIO
+from django.utils.text import slugify
+import re
 
 logger = logging.getLogger(__name__)
-
 def fetch_subject_details(branch_name, excel_file):
     try:
         student_details_df = pd.read_excel(excel_file)
@@ -50,22 +51,52 @@ def fetch_subject_details(branch_name, excel_file):
         print(df)
         logger.info(df)
 
-        # Assuming df is the DataFrame containing subject details
+        # Define a function to handle special characters and Roman numerals
+        def generate_short_form(course_name):
+            short_form = ""
+            words = re.findall(r"[\w']+|[.,!?;-]", course_name)  # Extract words, special characters, and hyphen (-)
+
+            for word in words:
+                if word.upper() == "AND" or word == "&":  # Ignore "AND" and "&"
+                    continue
+                elif word.upper() == "LAB" and course_name.upper().endswith("LAB"):
+                    short_form += " LAB"  # Append " LAB" for courses ending with "LAB"
+                else:
+                    # Check for Roman numeral or special case
+                    try:
+                        roman_numeral = int(word)
+                        short_form += f"-{roman_numeral}"  # Append Roman numeral with '-'
+                    except ValueError:
+                        # Check for hyphen followed by valid Roman numeral (including V)
+                        if len(word) > 1 and word[0] == '-' and all(char in "IVXLCM" for char in word[1:]):
+                            short_form += word  # Include the entire word (hyphen + Roman numeral)
+                        else:
+                            short_form += word[0].upper() if word.isalpha() else word  # First letter for words, entire word for special chars
+
+            return short_form.strip()
+
+        # Inside the fetch_subject_details function
         courses = []
+        slot_counter = 1
         for index, row in df.iterrows():
             course_code = row['Subject Code']
             course_name = row['Subject']
             branch = Branch.objects.get(branch_name=branch_name)
-
+            
+            # Generate short form
+            short_form = generate_short_form(course_name)
+            print(short_form)
             course = Course(
                 course_code=course_code,
                 course_name=course_name,
                 number_of_hours=0,
                 semester=semester,
-                branch=branch
+                branch=branch,
+                short_form=short_form.strip(),
+                slot=slot_counter
             )
             courses.append(course)
-
+            slot_counter+=1
         Course.objects.bulk_create(courses)
 
     except Exception as e:

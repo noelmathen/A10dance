@@ -30,8 +30,8 @@ class AttendanceStatsView(ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
     
     def get_queryset(self):
-        return PercentageDetails.objects.filter(student__user=self.request.user)
-    
+        return PercentageDetails.objects.filter(student__user=self.request.user).order_by('course__slot')
+        
     
 class BranchHourDetailsView(ListAPIView):
     serializer_class = BranchHourDetailsSerializer
@@ -61,5 +61,5 @@ class CourseTableView(ListAPIView):
     
     def get_queryset(self):
         student = Students.objects.get(user=self.request.user)
-        return Course.objects.filter(branch=student.branch)
+        return Course.objects.filter(branch=student.branch).order_by('slot')
     

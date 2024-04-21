@@ -94,7 +94,8 @@
                 <tr>
                     <th>Sl No</th>
                     <th>Code</th>
-                    <th>Subject</th>
+                    <th>Subject Name</th>
+                    <th>Subject Name(Shortform)</th>
                     <th>No. of hours</th>
                 </tr>
             </thead>
@@ -134,7 +135,7 @@
                         // Add details for each hour
                         for (let i = 1; i <= 7; i++) {
                             const hourCell = document.createElement('td');
-                            hourCell.textContent = record[`hour_${i}`] ? `${record[`hour_${i}`].course_code}` : '';
+                            hourCell.textContent = record[`hour_${i}`] ? `${record[`hour_${i}`].short_form}` : '';
                             row.appendChild(hourCell);
                         }
 
@@ -175,6 +176,11 @@
                     const subjectCell = document.createElement('td');
                     subjectCell.textContent = course.course_name;
                     row.appendChild(subjectCell);
+
+                    // Add course name shortform to the third cell
+                    const shortFormCell = document.createElement('td');
+                    shortFormCell.textContent = course.short_form;
+                    row.appendChild(shortFormCell);
 
                     // Add course name to the third cell
                     const numberOfHoursCell = document.createElement('td');

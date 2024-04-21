@@ -112,7 +112,8 @@
                 <tr>
                     <th>Sl No</th>
                     <th>Code</th>
-                    <th>Subject</th>
+                    <th>Subject Name</th>
+                    <th>Subject Name(Shortform)</th>
                     <th>Hours Lost</th>
                     <th>Percentage</th>
                 </tr>
@@ -159,7 +160,7 @@
                     for (let i = 1; i <= 7; i++) {
                         const hourCell = document.createElement('td');
                         //hourCell.textContent = record[`hour_${i}`] ? `${record[`hour_${i}`].course_code} - ${record[`hour_${i}`].course_name}` : '';
-                        hourCell.textContent = record[`hour_${i}`] ? `${record[`hour_${i}`].course_code}` : '';
+                        hourCell.textContent = record[`hour_${i}`] ? `${record[`hour_${i}`].short_form}` : '';
                         row.appendChild(hourCell);
                     }
 
@@ -196,8 +197,14 @@
 
                     // Add course name to the third cell
                     const subjectCell = document.createElement('td');
+                    //subjectCell.textContent = record.course.course_name + ' (' + record.course.short_form + ')';
                     subjectCell.textContent = record.course.course_name;
                     row.appendChild(subjectCell);
+
+                    // Add course name to the third cell
+                    const shortFormCell = document.createElement('td');
+                    shortFormCell.textContent = record.course.short_form;
+                    row.appendChild(shortFormCell);
 
                     // Add hours lost to the fourth cell
                     const hoursLostCell = document.createElement('td');

@@ -46,12 +46,16 @@ class Branch(models.Model):
         super().delete(*args, **kwargs)
         
 
+
 class Course(models.Model):
     course_code = models.CharField(max_length=20)
     course_name = models.CharField(max_length=100)
     number_of_hours = models.PositiveIntegerField(default=0)
     semester = models.PositiveIntegerField()
     branch = models.ForeignKey(Branch, on_delete=models.CASCADE)
-
+    slot = models.PositiveSmallIntegerField(null=True, blank=True)
+    short_form = models.CharField(max_length=10, null=True, blank=True)
+    
     def __str__(self):
-        return f"{self.course_name} ({self.course_code})"
+        # return f"{self.course_name} ({self.course_code})"
+        return f"{self.short_form}"

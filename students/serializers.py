@@ -7,7 +7,7 @@ from academia.models import Course
 class CourseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Course
-        fields = ['id', 'course_code', 'course_name', 'number_of_hours']
+        fields = ['id', 'course_code', 'course_name', 'short_form', 'number_of_hours']
 
 class StudentAttendanceSerializer(serializers.ModelSerializer):
     hour_1 = CourseSerializer()
@@ -34,7 +34,8 @@ class AttendanceStatsSerializer(serializers.ModelSerializer):
         
     def get_student_name(self, obj):
         return f"{obj.student.user.first_name}"
-
+    
+    
 class BranchHourDetailsSerializer(serializers.ModelSerializer):
     branch_name = serializers.SerializerMethodField()
     hour_1 = CourseSerializer()
