@@ -10,7 +10,9 @@ from .serializers import (
     AttendanceStatsSerializer, 
     BranchHourDetailsSerializer,
     CourseSerializer,
-    PredictionInputSerializer
+    PredictionInputSerializer,
+    DateFilterSerializer,
+    FilteredPercentageDetailsSerializer
 )
 from academia.models import Course
 from rest_framework.generics import ListAPIView
@@ -20,6 +22,8 @@ from rest_framework import status
 from .models import Students
 from accounts.models import CustomUser
 from datetime import datetime
+from django.db.models import Sum
+from collections import Counter
 
 
 class StudentAttendanceListView(ListAPIView):
@@ -108,3 +112,87 @@ class PredictPercentageView(APIView):
             return Response({'predicted_percentage': predicted_percentage}, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+class FilteredDataView(APIView):
+    def post(self, request):
+        start_date = request.data.get('start_date')
+        end_date = request.data.get('end_date')
+        print(start_date, end_date)
+        student = Students.objects.get(user=self.request.user)
+        print(student)
+        
+        # Step 1: Filter BranchHourDetails based on the provided date range
+        branch_hour_details = BranchHoursDetails.objects.filter(
+            date__range=[start_date, end_date],
+            branch=student.branch
+        )
+        print(branch_hour_details)
+        
+        # Step 2: Identify the courses conducted during the specified date range
+        courses_conducted = []
+        for entry in branch_hour_details:
+            courses_conducted.extend([
+                entry.hour_1,
+                entry.hour_2,
+                entry.hour_3,
+                entry.hour_4,
+                entry.hour_5,
+                entry.hour_6,
+                entry.hour_7
+            ])
+        print(courses_conducted)
+        
+        #Step 3: Calculating the number of hours for each course(None value excluded)
+        courses_conducted_without_none = [course for course in courses_conducted if course is not None]
+        course_counts_conducted = Counter(courses_conducted_without_none)
+        for course, count in course_counts_conducted.items():
+            print(f"Course: {course}, Hours Conducted: {count}")
+            
+            
+        
+        
+
+        # Step 4: Filter StudentAttendance based on the provided date range
+        student_attendance = StudentAttendance.objects.filter(
+            student=student,
+            date__range=[start_date, end_date],
+        )
+        print(f"\n{student_attendance}")
+
+        # Step 5: Identify the courses conducted during the specified date range
+        courses_missed = []
+        for entry in student_attendance:
+            courses_missed.extend([
+                entry.hour_1,
+                entry.hour_2,
+                entry.hour_3,
+                entry.hour_4,
+                entry.hour_5,
+                entry.hour_6,
+                entry.hour_7
+            ])
+        print(f"{courses_missed}")
+        
+        #Step 6: Calculating the number of hours for each course(None value excluded)
+        courses_missed_without_none = [course for course in courses_missed if course is not None]
+        course_counts_missed = Counter(courses_missed_without_none)
+        for course, count in course_counts_missed.items():
+            print(f"Course: {course}, Hours Missed: {count}")
+            
+            
+            
+        # Step 7: Calculate the percentage of attendance for each course missed by the student
+        percentage_details = {}
+        for course, count_missed in course_counts_missed.items():
+            total_hours = course_counts_conducted[course]  # Total hours conducted for the course
+            percentage = ((total_hours - count_missed) / total_hours) * 100
+            percentage_details[course.short_form] = round(percentage, 2)
+        print(percentage_details)
+        
+        response_data = {
+            'percentage_details': percentage_details
+        }
+        return Response(response_data, status=status.HTTP_200_OK)
+        

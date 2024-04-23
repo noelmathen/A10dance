@@ -54,9 +54,21 @@ class BranchHourDetailsSerializer(serializers.ModelSerializer):
         
 
 
-# Serializer for handling input data
 class PredictionInputSerializer(serializers.Serializer):
     course_id = serializers.IntegerField()
     hours_missed = serializers.IntegerField()
     
     
+    
+   
+    
+class DateFilterSerializer(serializers.Serializer):
+    start_date = serializers.DateField()
+    end_date = serializers.DateField()
+
+
+class FilteredPercentageDetailsSerializer(serializers.ModelSerializer):
+    # Define your serializer for PercentageDetails here
+    class Meta:
+        model = PercentageDetails
+        fields = '__all__'

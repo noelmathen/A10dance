@@ -6,6 +6,7 @@ from .views import (
     BranchHourDetailsView,
     CourseTableView,
     PredictPercentageView,
+    FilteredDataView,
     
 )   
 
@@ -15,5 +16,6 @@ urlpatterns = [
     path('branch-hour-details/', BranchHourDetailsView.as_view(), name='branch-hour-details'),    
     path('course-table/', CourseTableView.as_view(), name='course-table'),    
     path('predict-percentage/', PredictPercentageView.as_view(), name='predict_percentage'),
+    path('filter-percentage-details/', FilteredDataView.as_view(), name='filter_percentage_details'),
 ]
 
