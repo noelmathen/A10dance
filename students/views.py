@@ -24,7 +24,7 @@ from accounts.models import CustomUser
 from datetime import datetime
 from django.db.models import Sum
 from collections import Counter
-
+from django.shortcuts import get_object_or_404
 
 class StudentAttendanceListView(ListAPIView):
     serializer_class = StudentAttendanceSerializer
@@ -119,80 +119,93 @@ class FilteredDataView(APIView):
     def post(self, request):
         start_date = request.data.get('start_date')
         end_date = request.data.get('end_date')
-        print(start_date, end_date)
-        student = Students.objects.get(user=self.request.user)
-        print(student)
-        
+        student = get_object_or_404(Students, user=self.request.user)
+        actual_courses = Course.objects.filter(branch=student.branch).order_by('slot')
+
         # Step 1: Filter BranchHourDetails based on the provided date range
         branch_hour_details = BranchHoursDetails.objects.filter(
             date__range=[start_date, end_date],
             branch=student.branch
         )
-        print(branch_hour_details)
-        
-        # Step 2: Identify the courses conducted during the specified date range
-        courses_conducted = []
-        for entry in branch_hour_details:
-            courses_conducted.extend([
-                entry.hour_1,
-                entry.hour_2,
-                entry.hour_3,
-                entry.hour_4,
-                entry.hour_5,
-                entry.hour_6,
-                entry.hour_7
-            ])
-        print(courses_conducted)
-        
-        #Step 3: Calculating the number of hours for each course(None value excluded)
-        courses_conducted_without_none = [course for course in courses_conducted if course is not None]
-        course_counts_conducted = Counter(courses_conducted_without_none)
-        for course, count in course_counts_conducted.items():
-            print(f"Course: {course}, Hours Conducted: {count}")
-            
-            
-        
-        
 
+        # Step 2: Initialize counts for all courses to 0
+        course_counts_conducted = {course: 0 for course in actual_courses}
+
+        # Step 3: Identify the courses conducted during the specified date range
+        for entry in branch_hour_details:
+            for i in range(1, 8):
+                course = getattr(entry, f'hour_{i}')
+                if course:
+                    course_counts_conducted[course] += 1
+        
         # Step 4: Filter StudentAttendance based on the provided date range
         student_attendance = StudentAttendance.objects.filter(
             student=student,
             date__range=[start_date, end_date],
         )
-        print(f"\n{student_attendance}")
 
-        # Step 5: Identify the courses conducted during the specified date range
-        courses_missed = []
+        # Step 5: Initialize counts for all courses to 0
+        course_counts_missed = {course: 0 for course in actual_courses}
+
+        # Step 6: Identify the courses missed by the student during the specified date range
         for entry in student_attendance:
-            courses_missed.extend([
-                entry.hour_1,
-                entry.hour_2,
-                entry.hour_3,
-                entry.hour_4,
-                entry.hour_5,
-                entry.hour_6,
-                entry.hour_7
-            ])
-        print(f"{courses_missed}")
-        
-        #Step 6: Calculating the number of hours for each course(None value excluded)
-        courses_missed_without_none = [course for course in courses_missed if course is not None]
-        course_counts_missed = Counter(courses_missed_without_none)
-        for course, count in course_counts_missed.items():
-            print(f"Course: {course}, Hours Missed: {count}")
-            
-            
-            
+            for i in range(1, 8):
+                course = getattr(entry, f'hour_{i}')
+                if course:
+                    course_counts_missed[course] += 1
+
         # Step 7: Calculate the percentage of attendance for each course missed by the student
         percentage_details = {}
         for course, count_missed in course_counts_missed.items():
             total_hours = course_counts_conducted[course]  # Total hours conducted for the course
-            percentage = ((total_hours - count_missed) / total_hours) * 100
+            if total_hours > 0:
+                percentage = ((total_hours - count_missed) / total_hours) * 100
+            else:
+                percentage = 100  # If no hours conducted, consider attendance as 100%
             percentage_details[course.short_form] = round(percentage, 2)
-        print(percentage_details)
-        
+
+        # Step 8: Format student attendance data for response
+        attendance_data = []
+        for entry in student_attendance:
+            attendance_record = {
+                'date': entry.date,
+                'hour_1': entry.hour_1.short_form if entry.hour_1 else '',
+                'hour_2': entry.hour_2.short_form if entry.hour_2 else '',
+                'hour_3': entry.hour_3.short_form if entry.hour_3 else '',
+                'hour_4': entry.hour_4.short_form if entry.hour_4 else '',
+                'hour_5': entry.hour_5.short_form if entry.hour_5 else '',
+                'hour_6': entry.hour_6.short_form if entry.hour_6 else '',
+                'hour_7': entry.hour_7.short_form if entry.hour_7 else '',
+            }
+            attendance_data.append(attendance_record)
+
+        # Step 9: Format branch hour details data for response
+        branch_hour_details_data = []
+        for entry in branch_hour_details:
+            branch_hour_record = {
+                'date': entry.date,
+                'hour_1': entry.hour_1.short_form if entry.hour_1 else '',
+                'hour_2': entry.hour_2.short_form if entry.hour_2 else '',
+                'hour_3': entry.hour_3.short_form if entry.hour_3 else '',
+                'hour_4': entry.hour_4.short_form if entry.hour_4 else '',
+                'hour_5': entry.hour_5.short_form if entry.hour_5 else '',
+                'hour_6': entry.hour_6.short_form if entry.hour_6 else '',
+                'hour_7': entry.hour_7.short_form if entry.hour_7 else '',
+            }
+            branch_hour_details_data.append(branch_hour_record)
+
+        # Step 10: Prepare hours_lost and hours_conducted for each subject
+        hours_lost = {course.short_form: course_counts_missed[course] for course in actual_courses}
+        hours_conducted = {course.short_form: course_counts_conducted[course] for course in actual_courses}
+
         response_data = {
+            'branch_hour_details_table': branch_hour_details_data,
+            'hours_conducted': hours_conducted,
+            'student_attendance_table': attendance_data,
+            'hours_lost': hours_lost,
             'percentage_details': percentage_details
         }
-        return Response(response_data, status=status.HTTP_200_OK)
-        
+        return Response(response_data, status=status.HTTP_200_OK) 
+    
+
+
