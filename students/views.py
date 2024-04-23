@@ -11,8 +11,6 @@ from .serializers import (
     BranchHourDetailsSerializer,
     CourseSerializer,
     PredictionInputSerializer,
-    DateFilterSerializer,
-    FilteredPercentageDetailsSerializer
 )
 from academia.models import Course
 from rest_framework.generics import ListAPIView
@@ -194,16 +192,50 @@ class FilteredDataView(APIView):
             }
             branch_hour_details_data.append(branch_hour_record)
 
-        # Step 10: Prepare hours_lost and hours_conducted for each subject
+
+        #Percentage Details
+        percentage_details_table = []
         hours_lost = {course.short_form: course_counts_missed[course] for course in actual_courses}
+        for index, (course_short_form, percentage) in enumerate(percentage_details.items(), start=1):
+            course = get_object_or_404(Course, short_form=course_short_form)
+            course_obj = {
+                'SlNo': index,
+                'course_code': course.course_code,  
+                'course_name': course.course_name,  
+                'short_form': course_short_form,
+                'hours_lost': hours_lost[course_short_form],
+                'percentage': round(percentage, 2)
+            }
+            percentage_details_table.append(course_obj)
+
+
+
+        #Percentage Details
+        course_table = []
         hours_conducted = {course.short_form: course_counts_conducted[course] for course in actual_courses}
+        for index, (course_short_form, percentage) in enumerate(percentage_details.items(), start=1):
+            course = get_object_or_404(Course, short_form=course_short_form)
+            course_obj = {
+                'SlNo': index,
+                'course_code': course.course_code,  
+                'course_name': course.course_name,  
+                'short_form': course_short_form,
+                'hours_conducted': hours_conducted[course_short_form],
+            }
+            course_table.append(course_obj)
+
+
+
 
         response_data = {
             'branch_hour_details_table': branch_hour_details_data,
-            'hours_conducted': hours_conducted,
+            'course_table': course_table,
             'student_attendance_table': attendance_data,
-            'hours_lost': hours_lost,
-            'percentage_details': percentage_details
+            'percentage_details_table': percentage_details_table
+            
+            # 'hours_conducted': hours_conducted,
+            # 'hours_lost': hours_lost,
+            # 'percentage_details': percentage_details,
         }
         return Response(response_data, status=status.HTTP_200_OK) 
     

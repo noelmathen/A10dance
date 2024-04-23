@@ -1,3 +1,4 @@
+<!-- attendance.html -->
 <!DOCTYPE html>
 <html lang="en">
 
@@ -57,11 +58,13 @@
 
         .attendance-button {
             text-align: center;
-            margin-top: 20px; /* Adjust as needed */
+            margin-top: 20px;
+            /* Adjust as needed */
         }
-    
+
         .attendance-button button {
-            background-color: #a831a8; /* Green */
+            background-color: #a831a8;
+            /* Green */
             border: none;
             color: white;
             padding: 15px 32px;
@@ -75,9 +78,22 @@
             transition-duration: 0.4s;
             box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
         }
-    
+
         .attendance-button button:hover {
-            background-color: #ae0c86; /* Darker Green */
+            background-color: #ae0c86;
+            /* Darker Green */
+        }
+
+        .filter-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .filter-container input[type="date"] {
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            margin: 0 10px;
         }
     </style>
 </head>
@@ -85,8 +101,13 @@
 <body>
     <div class="attendance-container">
         <div class="welcome-message">Welcome <span id="username"></span></div>
-        <br><br>
-        <div class="welcome-message">Attendance Table</div>
+        <br><br><br>
+        <div class="filter-container">
+            From Date: <input type="date" id="from-date">
+            To Date: <input type="date" id="to-date">
+            <button onclick="filterAttendance()">Filter</button>
+        </div>
+        <div class="welcome-message">Student Attendance Table</div>
         <table id="attendance-table">
             <thead>
                 <tr>
@@ -221,9 +242,77 @@
             })
             .catch(error => console.error('Error fetching attendance details data:', error));
 
-            function ViewClassAttendance(){
-                window.location.href = "./branch_hour_details.html";
-            }
+
+        // Function to fetch filtered data from the backend
+        function filterAttendance() {
+            const startDate = document.getElementById('from-date').value;
+            const endDate = document.getElementById('to-date').value;
+
+            fetch(SERVER_URL + 'filter-percentage-details/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Token ${loggedInUser.token}`
+                },
+                body: JSON.stringify({
+                    start_date: startDate,
+                    end_date: endDate
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    // Update student attendance table
+                    const attendanceTableBody = document.querySelector('#attendance-table tbody');
+                    attendanceTableBody.innerHTML = ''; // Clear existing rows
+                    data.student_attendance_table.forEach(record => {
+                        const row = document.createElement('tr');
+                        for (const key in record) {
+                            const cell = document.createElement('td');
+                            cell.textContent = record[key];
+                            row.appendChild(cell);
+                        }
+                        attendanceTableBody.appendChild(row);
+                    });
+
+                    // Update percentage details table
+                    const percentageTableBody = document.querySelector('#attendance-details-table tbody');
+                    percentageTableBody.innerHTML = ''; // Clear existing rows
+                    data.percentage_details_table.forEach(record => {
+                        const row = document.createElement('tr');
+                        const slNoCell = document.createElement('td');
+                        slNoCell.textContent = record.SlNo;
+                        row.appendChild(slNoCell);
+
+                        const codeCell = document.createElement('td');
+                        codeCell.textContent = record.course_code;
+                        row.appendChild(codeCell);
+
+                        const subjectCell = document.createElement('td');
+                        subjectCell.textContent = record.course_name;
+                        row.appendChild(subjectCell);
+
+                        const shortFormCell = document.createElement('td');
+                        shortFormCell.textContent = record.short_form;
+                        row.appendChild(shortFormCell);
+
+                        const hoursLostCell = document.createElement('td');
+                        hoursLostCell.textContent = record.hours_lost;
+                        row.appendChild(hoursLostCell);
+
+                        const percentageCell = document.createElement('td');
+                        percentageCell.textContent = record.percentage;
+                        row.appendChild(percentageCell);
+
+                        percentageTableBody.appendChild(row);
+                    });
+                })
+                .catch(error => console.error('Error fetching filtered data:', error));
+        }
+
+
+        function ViewClassAttendance() {
+            window.location.href = "./branch_hour_details.html";
+        }
     </script>
 </body>
 

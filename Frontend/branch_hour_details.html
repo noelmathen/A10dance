@@ -1,3 +1,4 @@
+<!-- branch_hour_details.html -->
 <!DOCTYPE html>
 <html lang="en">
 
@@ -67,6 +68,12 @@
 
 <body>
     <div class="branch-hour-container">
+        <br>
+        <div class="filter-container">
+            From Date: <input type="date" id="from-date">
+            To Date: <input type="date" id="to-date">
+            <button onclick="filterAttendance()">Filter</button>
+        </div>
         <div class="welcome-message">Branch Hour Details</div>
         <table id="branch-hour-table">
             <thead>
@@ -191,6 +198,69 @@
                 });
             })
             .catch(error => console.error('Error fetching course data:', error));
+
+
+        // Function to fetch filtered data from the backend
+        function filterAttendance() {
+            const startDate = document.getElementById('from-date').value;
+            const endDate = document.getElementById('to-date').value;
+
+            fetch(SERVER_URL + 'filter-percentage-details/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Token ${loggedInUser.token}`
+                },
+                body: JSON.stringify({
+                    start_date: startDate,
+                    end_date: endDate
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    // Update branch hour details table
+                    const branchHourDetailsTableBody = document.querySelector('#branch-hour-table tbody');
+                    branchHourDetailsTableBody.innerHTML = ''; // Clear existing rows
+                    data.branch_hour_details_table.forEach(record => {
+                        const row = document.createElement('tr');
+                        for (const key in record) {
+                            const cell = document.createElement('td');
+                            cell.textContent = record[key];
+                            row.appendChild(cell);
+                        }
+                        branchHourDetailsTableBody.appendChild(row);
+                    });
+
+                    // Update course table
+                    const courseTableBody = document.querySelector('#course-table tbody');
+                    courseTableBody.innerHTML = ''; // Clear existing rows
+                    data.course_table.forEach(record => {
+                        const row = document.createElement('tr');
+                        const slNoCell = document.createElement('td');
+                        slNoCell.textContent = record.SlNo;
+                        row.appendChild(slNoCell);
+
+                        const codeCell = document.createElement('td');
+                        codeCell.textContent = record.course_code;
+                        row.appendChild(codeCell);
+
+                        const subjectCell = document.createElement('td');
+                        subjectCell.textContent = record.course_name;
+                        row.appendChild(subjectCell);
+
+                        const shortFormCell = document.createElement('td');
+                        shortFormCell.textContent = record.short_form;
+                        row.appendChild(shortFormCell);
+
+                        const hoursConductedCell = document.createElement('td');
+                        hoursConductedCell.textContent = record.hours_conducted;
+                        row.appendChild(hoursConductedCell);
+
+                        courseTableBody.appendChild(row);
+                    });
+                })
+                .catch(error => console.error('Error fetching filtered data:', error));
+        }    
     </script>
 </body>
 
