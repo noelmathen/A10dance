@@ -10,7 +10,7 @@ from io import StringIO
 from datetime import datetime
 from django.core.exceptions import ObjectDoesNotExist
 from academia.models import Course
-
+from django.utils import timezone
 
 def get_attendance_percentage(branch):
     students = Students.objects.filter(branch=branch)
@@ -246,6 +246,11 @@ def update_attendance_details(branch):
         insert_branch_attendance(common_attendance_df, branch)
         update_course_number_of_hours(common_attendance_df, branch)    
         get_attendance_percentage(branch)
+        
+        naive_datetime_object = datetime.now()
+        aware_datetime = timezone.make_aware(naive_datetime_object)
+        branch.last_attendance_update = aware_datetime
+        branch.save()
         
     except Exception as e:
         print(f"Error: {e}")

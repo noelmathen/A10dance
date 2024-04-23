@@ -28,6 +28,7 @@ class Branch(models.Model):
     branch_name = models.CharField(max_length=100, choices=BRANCH_CHOICES) 
     division = models.CharField(max_length=10, choices=DIVISION_CHOICES, blank=True)
     excel_file = models.FileField(upload_to='branch_excel_files', default=r'C:\Users\noelm\Documents\PROJECTS\A10dance\Other Files\CSBS_2021-2025.xlsx')
+    last_attendance_update = models.DateTimeField(null=True, blank=True)
     
     def __str__(self):
         return f"{self.branch_name} {self.division} ({self.joining_year} - {self.passout_year})"

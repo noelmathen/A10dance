@@ -54,4 +54,6 @@ class PercentageDetails(models.Model):
     def __str__(self):
         return f"{self.student.user.first_name} - {self.student.branch.branch_name} - {self.course.course_name} - {self.percentage_of_subject}"
 
-
+    def save(self, *args, **kwargs):
+        self.percentage_of_subject = round(self.percentage_of_subject, 2)
+        super().save(*args, **kwargs)
