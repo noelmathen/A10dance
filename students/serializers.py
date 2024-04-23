@@ -27,7 +27,6 @@ class StudentAttendanceSerializer(serializers.ModelSerializer):
 class AttendanceStatsSerializer(serializers.ModelSerializer):
     course = CourseSerializer()
     student_name = serializers.SerializerMethodField()
-    
     class Meta:
         model = PercentageDetails
         fields = ['student', 'student_name', 'course', 'hours_lost_with_duty', 'hours_lost_without_duty', 'percentage_of_subject']
@@ -54,3 +53,10 @@ class BranchHourDetailsSerializer(serializers.ModelSerializer):
         return f"{obj.branch.branch_name} {obj.branch.division} ({obj.branch.joining_year} - {obj.branch.passout_year})"
         
 
+
+# Serializer for handling input data
+class PredictionInputSerializer(serializers.Serializer):
+    course_id = serializers.IntegerField()
+    hours_missed = serializers.IntegerField()
+    
+    

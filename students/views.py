@@ -1,5 +1,5 @@
 #students/views.py
-from rest_framework import viewsets, permissions
+from rest_framework import permissions
 from attendance.models import (
     StudentAttendance,
     PercentageDetails,
@@ -10,11 +10,17 @@ from .serializers import (
     AttendanceStatsSerializer, 
     BranchHourDetailsSerializer,
     CourseSerializer,
+    PredictionInputSerializer
 )
 from academia.models import Course
 from rest_framework.generics import ListAPIView
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
 from .models import Students
+from accounts.models import CustomUser
 from datetime import datetime
+
 
 class StudentAttendanceListView(ListAPIView):
     serializer_class = StudentAttendanceSerializer
@@ -63,3 +69,42 @@ class CourseTableView(ListAPIView):
         student = Students.objects.get(user=self.request.user)
         return Course.objects.filter(branch=student.branch).order_by('slot')
     
+    
+
+class PredictPercentageView(APIView):
+    def post(self, request):
+        # Deserialize input data
+        serializer = PredictionInputSerializer(data=request.data)
+        if serializer.is_valid():
+            # Extract input data from validated data
+            course_id = serializer.validated_data['course_id']
+            hours_missed = serializer.validated_data['hours_missed']
+            
+            # Get the course object
+            try:
+                course = Course.objects.get(id=course_id)
+            except Course.DoesNotExist:
+                return Response({'error': 'Course not found'}, status=status.HTTP_404_NOT_FOUND)
+            
+            # Get the student profile of the logged-in user
+            try:
+                user = request.user
+                student = user.students  # Assuming students is a related model of CustomUser
+            except CustomUser.DoesNotExist:
+                return Response({'error': 'Student profile not found'}, status=status.HTTP_404_NOT_FOUND)
+            
+            try:
+                percentage_details = PercentageDetails.objects.get(
+                    student=student,  # Assuming the logged-in user has a student profile
+                    course=course                
+                )
+            except PercentageDetails.DoesNotExist:
+                return Response({'error': 'PercentageDetails object not found'}, status=status.HTTP_404_NOT_FOUND)
+            
+            tot_hours = course.number_of_hours + hours_missed
+            hours_lost = percentage_details.hours_lost_without_duty + hours_missed
+            predicted_percentage = ((tot_hours - hours_lost) / tot_hours) * 100
+            
+            return Response({'predicted_percentage': predicted_percentage}, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
