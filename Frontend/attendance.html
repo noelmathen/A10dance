@@ -13,28 +13,36 @@
             margin: 0;
             padding: 0;
             background-color: #f0f0f0;
-            /*display: flex;*/
             justify-content: center;
             align-items: center;
             height: 100vh;
+        }
+
+        .attendance-container {
+            width: 80%;
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 40px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            margin: auto;
+            margin-top: 20px;
         }
 
         .welcome-message {
             font-size: 24px;
             font-weight: bold;
             color: #333;
-            margin-bottom: 20px;
+            margin-bottom: 0px;
             text-align: center;
             margin-top: 20px;
-            /* Increased for spacing */
         }
 
         table {
-            width: 80%;
+            width: 100%;
             border-collapse: collapse;
             font-family: Arial, sans-serif;
             margin: auto;
-            /* Added margin for spacing */
         }
 
         th,
@@ -100,14 +108,20 @@
 
 <body>
     <div class="attendance-container">
-        <div class="welcome-message">Welcome <span id="username"></span></div>
-        <br><br><br>
+        <div id="branch-details-container">
+            <div class="welcome-message"><span id="username"></span></div>
+            <div class="welcome-message" id="branch-details"><span id="branch-name"></span></div>
+            <div id="last-updated">Last updated on: </div>
+        </div>
+        <br><br>
+        <div class="welcome-message">Attendance Details</div>
+        <br>
         <div class="filter-container">
             From Date: <input type="date" id="from-date">
             To Date: <input type="date" id="to-date">
             <button onclick="filterAttendance()">Filter</button>
         </div>
-        <div class="welcome-message">Student Attendance Table</div>
+        <br>
         <table id="attendance-table">
             <thead>
                 <tr>
@@ -155,6 +169,27 @@
         if (loggedInUser && loggedInUser.first_name) {
             document.getElementById('username').textContent = loggedInUser.first_name;
         }
+
+        // Fetch branch details from the backend
+        fetch(SERVER_URL + 'branch-details/', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Token ${loggedInUser.token}`
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('branch-name').textContent = `${data.branch_name} (${data.joining_year}-${data.passout_year})`;
+
+                const lastUpdated = new Date(data.last_update);
+                const formattedDate = `${lastUpdated.getDate().toString().padStart(2, '0')}/${(lastUpdated.getMonth() + 1).toString().padStart(2, '0')}/${lastUpdated.getFullYear()}`;
+                const hours = lastUpdated.getHours() % 12 || 12;
+                const minutes = lastUpdated.getMinutes();
+                const amPm = lastUpdated.getHours() < 12 ? 'AM' : 'PM';
+                const formattedTime = `${hours}:${minutes < 10 ? '0' : ''}${minutes} ${amPm}`;
+                document.getElementById('last-updated').textContent += `${formattedDate} ${formattedTime}`;
+            })
+            .catch(error => console.error('Error fetching branch details:', error));
 
 
         // Fetch attendance data from backend API

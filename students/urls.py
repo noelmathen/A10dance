@@ -7,6 +7,7 @@ from .views import (
     CourseTableView,
     PredictPercentageView,
     FilteredDataView,
+    BranchDetailsView
     
 )   
 
@@ -17,5 +18,6 @@ urlpatterns = [
     path('course-table/', CourseTableView.as_view(), name='course-table'),    
     path('predict-percentage/', PredictPercentageView.as_view(), name='predict_percentage'),
     path('filter-percentage-details/', FilteredDataView.as_view(), name='filter_percentage_details'),
+    path('branch-details/', BranchDetailsView.as_view(), name='branch-details'),
 ]
 

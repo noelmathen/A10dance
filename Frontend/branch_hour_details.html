@@ -33,7 +33,7 @@
             font-size: 24px;
             font-weight: bold;
             color: #333;
-            margin-bottom: 20px;
+            margin-bottom: 0px;
             text-align: center;
             margin-top: 20px;
         }
@@ -63,18 +63,37 @@
         tr:hover {
             background-color: #f2f2f2;
         }
+
+        .filter-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .filter-container input[type="date"] {
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            margin: 0 10px;
+        }
     </style>
 </head>
 
 <body>
     <div class="branch-hour-container">
+        <div id="branch-details-container">
+            <div class="welcome-message"><span id="username"></span></div>
+            <div class="welcome-message" id="branch-details"><span id="branch-name"></span></div>
+            <div id="last-updated">Last updated on: </div>
+        </div>
+        <br><br>
+        <div class="welcome-message">Class Attendance Details</div>
         <br>
         <div class="filter-container">
             From Date: <input type="date" id="from-date">
             To Date: <input type="date" id="to-date">
             <button onclick="filterAttendance()">Filter</button>
         </div>
-        <div class="welcome-message">Branch Hour Details</div>
+        <br>
         <table id="branch-hour-table">
             <thead>
                 <tr>
@@ -95,7 +114,7 @@
         </table>
 
         <br><br>
-        <div class="welcome-message">Course Table</div>
+        <div class="welcome-message">Subject Details</div>
         <table id="course-table">
             <thead>
                 <tr>
@@ -114,6 +133,31 @@
 
     <script>
         const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
+        if (loggedInUser && loggedInUser.first_name) {
+            document.getElementById('username').textContent = loggedInUser.first_name;
+        }
+
+        // Fetch branch details from the backend
+        fetch(SERVER_URL + 'branch-details/', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Token ${loggedInUser.token}`
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('branch-name').textContent = `${data.branch_name} (${data.joining_year}-${data.passout_year})`;
+
+                const lastUpdated = new Date(data.last_update);
+                const formattedDate = `${lastUpdated.getDate().toString().padStart(2, '0')}/${(lastUpdated.getMonth() + 1).toString().padStart(2, '0')}/${lastUpdated.getFullYear()}`;
+                const hours = lastUpdated.getHours() % 12 || 12;
+                const minutes = lastUpdated.getMinutes();
+                const amPm = lastUpdated.getHours() < 12 ? 'AM' : 'PM';
+                const formattedTime = `${hours}:${minutes < 10 ? '0' : ''}${minutes} ${amPm}`;
+                document.getElementById('last-updated').textContent += `${formattedDate} ${formattedTime}`;
+            })
+            .catch(error => console.error('Error fetching branch details:', error));
+
 
         // Fetch branch hour details data from backend API
         document.addEventListener('DOMContentLoaded', function () {

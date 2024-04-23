@@ -1,10 +1,12 @@
 #students/views.py
-from rest_framework import permissions
 from attendance.models import (
     StudentAttendance,
     PercentageDetails,
     BranchHoursDetails,
 )
+from .models import Students
+from academia.models import Branch, Course
+from accounts.models import CustomUser
 from .serializers import (
     StudentAttendanceSerializer, 
     AttendanceStatsSerializer, 
@@ -12,17 +14,16 @@ from .serializers import (
     CourseSerializer,
     PredictionInputSerializer,
 )
-from academia.models import Course
+from rest_framework import permissions
+from rest_framework import status
 from rest_framework.generics import ListAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
-from .models import Students
-from accounts.models import CustomUser
-from datetime import datetime
-from django.db.models import Sum
-from collections import Counter
 from django.shortcuts import get_object_or_404
+from django.core.exceptions import ObjectDoesNotExist
+from datetime import datetime
+
+
 
 class StudentAttendanceListView(ListAPIView):
     serializer_class = StudentAttendanceSerializer
@@ -110,6 +111,24 @@ class PredictPercentageView(APIView):
             return Response({'predicted_percentage': predicted_percentage}, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class BranchDetailsView(APIView):
+    def get(self, request):
+        try:
+            student = Students.objects.get(user=self.request.user)
+            branch = Branch.objects.get(id=student.branch.id)
+            last_attendance_update = branch.last_attendance_update
+            respone_data = {
+                'joining_year':branch.joining_year,
+                'passout_year':branch.passout_year,
+                'branch_name':branch.branch_name,
+                'division':branch.division,
+                'last_update':last_attendance_update,
+            }
+            return Response(respone_data, status=status.HTTP_200_OK)
+        except ObjectDoesNotExist:
+            return Response({'error': 'Student or branch not found'}, status=status.HTTP_404_NOT_FOUND)
 
 
 

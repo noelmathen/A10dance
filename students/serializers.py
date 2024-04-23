@@ -2,7 +2,7 @@
 from rest_framework import serializers
 from attendance.models import StudentAttendance, PercentageDetails, BranchHoursDetails
 from academia.models import Course
-
+from attendance.models import Branch
 
 class CourseSerializer(serializers.ModelSerializer):
     class Meta:
@@ -57,18 +57,5 @@ class BranchHourDetailsSerializer(serializers.ModelSerializer):
 class PredictionInputSerializer(serializers.Serializer):
     course_id = serializers.IntegerField()
     hours_missed = serializers.IntegerField()
-    
-    
-    
-   
-    
-class DateFilterSerializer(serializers.Serializer):
-    start_date = serializers.DateField()
-    end_date = serializers.DateField()
+        
 
-
-class FilteredPercentageDetailsSerializer(serializers.ModelSerializer):
-    # Define your serializer for PercentageDetails here
-    class Meta:
-        model = PercentageDetails
-        fields = '__all__'
