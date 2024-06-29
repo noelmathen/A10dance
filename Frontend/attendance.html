@@ -103,7 +103,107 @@
             border: 1px solid #ccc;
             margin: 0 10px;
         }
+
+        /* Style the custom select dropdown */
+        .custom-select {
+            position: relative;
+            display: inline-block;
+            margin-right: 40px;
+            /* Add some spacing between "Select Course" and its dropdown */
+        }
+
+        /* Style the select element */
+        .custom-select select {
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            width: 90px;
+            /* Adjust width as needed */
+            appearance: none;
+            /* Remove default appearance */
+            -webkit-appearance: none;
+            /* Remove default appearance for Safari */
+            -moz-appearance: none;
+            /* Remove default appearance for Firefox */
+            background-color: #fff;
+            /* Background color */
+            cursor: pointer;
+            outline: none;
+            /* Remove outline */
+        }
+
+        /* Style the arrow icon */
+        .custom-select::after {
+            content: '\25BC';
+            /* Unicode character for down arrow */
+            position: absolute;
+            top: 50%;
+            right: 10px;
+            transform: translateY(-50%);
+            pointer-events: none;
+            /* Ensure the arrow is not clickable */
+        }
+
+        /* Hover effect for the select element */
+        .custom-select select:hover {
+            border-color: #999;
+            /* Change border color on hover */
+        }
+
+        /* Focus effect for the select element */
+        .custom-select select:focus {
+            border-color: #666;
+            /* Change border color on focus */
+        }
+
+        /* Add some gap between "Hours Missed" label and its input field */
+        .prediction-form label {
+            margin-right: 10px;
+            margin-bottom: 10px;
+            /* Add margin-bottom for spacing */
+        }
+
+        /* Add some gap between "Hours Missed" input field and the "Predict Percentage" button */
+        .prediction-form input[type="number"] {
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            margin-right: 40px;
+            /* Add some spacing */
+            margin-bottom: 10px;
+            /* Add margin-bottom for spacing */
+            width: 50px;
+        }
+
+        /* Style the "Predict Percentage" button */
+        .prediction-form button {
+            background-color: #4CAF50;
+            /* Green */
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        /* Hover effect for the "Predict Percentage" button */
+        .prediction-form button:hover {
+            background-color: #45a049;
+        }
+
+        /* Style the predicted percentage display */
+        .prediction-result {
+            margin-top: 10px;
+            font-size: 18px;
+            font-weight: bold;
+        }
     </style>
+
+
 </head>
 
 <body>
@@ -158,6 +258,20 @@
             </tbody>
         </table>
         </table>
+
+        <br><br>
+        <div class="welcome-message">Predict Percentage</div>
+        <div class="prediction-form">
+            <div class="custom-select">
+                <label for="course-select">Select Course:</label>
+                <select id="course-select">
+                </select>
+            </div>
+            <label for="hours-missed">Hours Missed:</label>
+            <input type="number" id="hours-missed" name="hours-missed">
+            <button onclick="predictPercentage()">Predict Percentage</button>
+            <div id="prediction-result" class="prediction-result"></div>
+        </div>
     </div>
 
     <div class="attendance-button">
@@ -257,17 +371,17 @@
                     subjectCell.textContent = record.course.course_name;
                     row.appendChild(subjectCell);
 
-                    // Add course name to the third cell
+                    // Add course name to the fourth cell
                     const shortFormCell = document.createElement('td');
                     shortFormCell.textContent = record.course.short_form;
                     row.appendChild(shortFormCell);
 
-                    // Add hours lost to the fourth cell
+                    // Add hours lost to the fifth cell
                     const hoursLostCell = document.createElement('td');
                     hoursLostCell.textContent = record.hours_lost_with_duty;
                     row.appendChild(hoursLostCell);
 
-                    // Add percentage to the fifth cell
+                    // Add percentage to the sixth cell
                     const percentageCell = document.createElement('td');
                     percentageCell.textContent = record.percentage_of_subject;
                     row.appendChild(percentageCell);
@@ -342,6 +456,53 @@
                     });
                 })
                 .catch(error => console.error('Error fetching filtered data:', error));
+        }
+
+
+        function fetchCourses() {
+            fetch(SERVER_URL + 'course-table/', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Token ${loggedInUser.token}`,
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    const courseSelect = document.getElementById('course-select');
+                    data.forEach(course => {
+                        const option = document.createElement('option');
+                        option.value = course.id;
+                        option.textContent = `${course.short_form}`;
+                        courseSelect.appendChild(option);
+                    });
+                })
+                .catch(error => console.error('Error fetching courses:', error));
+        }
+
+        // Call fetchCourses() when the page loads to populate the dropdown menu
+        fetchCourses();
+
+        function predictPercentage() {
+            const courseId = document.getElementById('course-select').value;
+            const hoursMissed = document.getElementById('hours-missed').value;
+
+            fetch(SERVER_URL + 'predict-percentage/', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Token ${loggedInUser.token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    course_id: parseInt(courseId),
+                    hours_missed: parseInt(hoursMissed)
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('prediction-result').textContent = `Predicted Percentage: ${data.predicted_percentage.toFixed(2)}%`;
+                })
+                .catch(error => console.error('Error predicting percentage:', error));
         }
 
 
