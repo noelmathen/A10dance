@@ -58,7 +58,7 @@ class StudentAttendanceAdmin(admin.ModelAdmin):
     list_display = ['student', 'date', 'hour_1', 'hour_2', 'hour_3', 'hour_4', 'hour_5', 'hour_6', 'hour_7', 'duty_hour_1', 'duty_hour_2', 'duty_hour_3', 'duty_hour_4', 'duty_hour_5', 'duty_hour_6', 'duty_hour_7']
     ordering = ['student', 'date']  # Order by the 'date' field in ascending order
     search_fields = ['student__user__first_name', 'date']  # Enable search based on student's first name and date
-    list_filter = ['student__user__first_name', 'date', 'duty_hour_1', 'duty_hour_2', 'duty_hour_3', 'duty_hour_4', 'duty_hour_5', 'duty_hour_6', 'duty_hour_7']  # Enable filtering based on student's first name, date, and duty_hour fields
+    list_filter = ['student__user__first_name', 'date']  # Enable filtering based on student's first name, date, and duty_hour fields
 
 
 

@@ -2,6 +2,7 @@
 from django.db import models
 from academia.models import Branch, Course
 from students.models import Students
+from simple_history.models import HistoricalRecords
 
 
 class BranchHoursDetails(models.Model):
@@ -38,7 +39,8 @@ class StudentAttendance(models.Model):
     duty_hour_5 = models.BooleanField(default=False)
     duty_hour_6 = models.BooleanField(default=False)
     duty_hour_7 = models.BooleanField(default=False)
-
+    history = HistoricalRecords()
+    
     def __str__(self):
         return f"{self.student.user.first_name} - {self.date}"
 
