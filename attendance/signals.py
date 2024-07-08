@@ -4,6 +4,8 @@ from django.dispatch import receiver
 from .models import BranchHoursDetails, Course, PercentageDetails, Students, StudentAttendance
 from django.core.mail import send_mail
 from django.conf import settings
+from asgiref.sync import async_to_sync
+import threading
 
 def update_attendance_percentages_for_course_students(course):
     students = Students.objects.filter(branch=course.branch)
@@ -90,6 +92,10 @@ def handle_attendance_delete(sender, instance, **kwargs):
 
 
 
+# Function to send email in a new thread
+def send_mail_thread(subject, message, recipient_list):
+    send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, recipient_list)
+
 def send_absence_email(instance, new_entry=False, deleted=False):
     student = instance.student
     email = student.user.email
@@ -102,8 +108,8 @@ def send_absence_email(instance, new_entry=False, deleted=False):
     if deleted:
         print("\n\nTRIGGER EXECUTED, DELETED ABSENT, GOING TO SEND EMAIL\n\n")
         subject = 'Absence Record Removed'
-        message = f"Dear {student.user.first_name},\n\nYour absence record for {date} has been removed.\n\nBest regards,\nYour School Administration"
-        send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [email])
+        message = f"Dear {student.user.first_name},\n\nYour absence record for {date} has been removed.\n\nBest regards\na10dance"
+        threading.Thread(target=send_mail_thread, args=(subject, message, [email])).start()
     else:
         previous_state = instance._previous_state
 
@@ -133,14 +139,14 @@ def send_absence_email(instance, new_entry=False, deleted=False):
         if marked_duty_hours:
             print("\n\nTRIGGER EXECUTED, MARKED DUTY HOUR, GOING TO SEND EMAIL\n\n")
             subject = 'Duty Hour Marked'
-            message = f"Dear {student.user.first_name},\n\nYour absence record for {date} has been updated with the following duty hours:\n" + "\n".join(marked_duty_hours) + "\n\nBest regards,\nYour School Administration"
+            message = f"Dear {student.user.first_name},\n\nYour attendance for {date} has been updated with the following DUTY HOURS:\n" + "\n".join(marked_duty_hours) + "\n\nBest regards\na10dance"
             email_messages.append((subject, message, email))
 
         # Send duty hour unmarked email
         if unmarked_duty_hours:
             print("\n\nTRIGGER EXECUTED, UNMARKED DUTY HOUR, GOING TO SEND EMAIL\n\n")
             subject = 'Duty Hour Unmarked'
-            message = f"Dear {student.user.first_name},\n\nYour duty hour for {date} has been unmarked for the following hours:\n" + "\n".join(unmarked_duty_hours) + "\n\nBest regards,\nYour School Administration"
+            message = f"Dear {student.user.first_name},\n\nYour duty hour for {date} has been unmarked for the following hours:\n" + "\n".join(unmarked_duty_hours) + "\n\nBest regards\na10dance"
             email_messages.append((subject, message, email))
 
         # Send absence update emails only if there are no duty hour changes
@@ -149,20 +155,19 @@ def send_absence_email(instance, new_entry=False, deleted=False):
                 if new_entry:
                     print("\n\nTRIGGER EXECUTED, ADDED ABSENT, GOING TO SEND EMAIL\n\n")
                     subject = 'New Absence Recorded'
-                    message = f"Dear {student.user.first_name},\n\nYou have been marked absent on {date} for the following hours:\n" + "\n".join(added_absences) + "\n\nPlease check with your teacher if this is a mistake.\n\nBest regards,\nYour School Administration"
+                    message = f"Dear {student.user.first_name},\n\nYou have been marked absent on {date} for the following hours:\n" + "\n".join(added_absences) + "\n\nPlease check with your teacher if this is a mistake.\n\nBest regards\na10dance"
                 else:
                     print("\n\nTRIGGER EXECUTED, MODIFIED ABSENT, GOING TO SEND EMAIL\n\n")
                     subject = 'Absence Record Updated'
-                    message = f"Dear {student.user.first_name},\n\nYour absence record for {date} has been updated for the following hours:\n" + "\n".join(added_absences) + "\n\nPlease check with your teacher if this is a mistake.\n\nBest regards,\nYour School Administration"
+                    message = f"Dear {student.user.first_name},\n\nYour attendance for {date} has been updated for the following hours:\n" + "\n".join(added_absences) + "\n\nPlease check with your teacher if this is a mistake.\n\nBest regards\na10dance"
                 email_messages.append((subject, message, email))
 
             if removed_absences:
                 print("\n\nTRIGGER EXECUTED, REMOVED ABSENT, GOING TO SEND EMAIL\n\n")
                 subject = 'Absence Record Corrected'
-                message = f"Dear {student.user.first_name},\n\nYour absence record for {date} has been corrected for the following hours:\n" + "\n".join(removed_absences) + "\n\nBest regards,\nYour School Administration"
+                message = f"Dear {student.user.first_name},\n\nYour attendance for {date} has been corrected(unmarked as absent) for the following hours:\n" + "\n".join(removed_absences) + "\n\nBest regards\na10dance"
                 email_messages.append((subject, message, email))
 
         for subject, message, recipient in email_messages:
-            send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [recipient])
-
+            threading.Thread(target=send_mail_thread, args=(subject, message, [recipient])).start()
 
