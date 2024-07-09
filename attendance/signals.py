@@ -21,7 +21,10 @@ def update_attendance_percentages_for_course_students(course):
             percentage_detail = PercentageDetails.objects.get(student=student, course=course)
             tot_hours = course.number_of_hours
             hours_lost = percentage_detail.hours_lost_without_duty
-            course_percentage = ((tot_hours - hours_lost) / tot_hours) * 100
+            if tot_hours > 0:
+                course_percentage = ((tot_hours - hours_lost) / tot_hours) * 100
+            else:
+                course_percentage = 0  
             percentage_detail.percentage_of_subject = course_percentage
             percentage_detail.save()
             # print("before print")
