@@ -12,6 +12,8 @@ from django.conf import settings
 from asgiref.sync import async_to_sync
 import threading
 
+
+
 def update_attendance_percentages_for_course_students(course):
     students = Students.objects.filter(branch=course.branch)
     for student in students:
@@ -28,6 +30,8 @@ def update_attendance_percentages_for_course_students(course):
         except PercentageDetails.DoesNotExist:
             print(f"No attendance percentage record found for {student.user.first_name} for {course.course_name}")
 
+
+
 def get_changed_courses(old_instance, new_instance):
     changed_courses = []
     for i in range(1, 8):
@@ -41,6 +45,15 @@ def get_changed_courses(old_instance, new_instance):
                 changed_courses.append(old_course)
     return list(set(changed_courses))
 
+
+
+def cleanup_empty_entries():
+    for entry in BranchHoursDetails.objects.all():
+        if all(getattr(entry, f'hour_{i}') in [None, ''] for i in range(1, 8)):
+            entry.delete()
+      
+          
+            
 @receiver(pre_save, sender=BranchHoursDetails)
 def handle_branch_hours_pre_save(sender, instance, **kwargs):
     if instance.pk:
@@ -50,6 +63,8 @@ def handle_branch_hours_pre_save(sender, instance, **kwargs):
             instance._previous_state = None
     else:
         instance._previous_state = None
+
+
 
 @receiver(post_save, sender=BranchHoursDetails)
 def update_course_number_of_hours(sender, instance, created, **kwargs):
@@ -68,11 +83,15 @@ def update_course_number_of_hours(sender, instance, created, **kwargs):
                 course.number_of_hours = total_hours
                 course.save(update_fields=['number_of_hours'])
                 update_attendance_percentages_for_course_students(course)
+    cleanup_empty_entries()
+
 
 @receiver(pre_delete, sender=BranchHoursDetails)
 def handle_branch_hours_pre_delete(sender, instance, **kwargs):
     instance._previous_state = instance
     instance._changed_course_ids = [getattr(instance, f'hour_{i}').id for i in range(1, 8) if getattr(instance, f'hour_{i}')]
+
+
 
 @receiver(post_delete, sender=BranchHoursDetails)
 def update_course_number_of_hours_on_delete(sender, instance, **kwargs):
@@ -91,8 +110,7 @@ def update_course_number_of_hours_on_delete(sender, instance, **kwargs):
             update_attendance_percentages_for_course_students(course)
         except Course.DoesNotExist:
             print(f"Course with id {course_id} does not exist.")
-        
-       
+    cleanup_empty_entries()       
        
         
 #Handle sending mails when attendance of students are updated hehe
