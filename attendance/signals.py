@@ -6,7 +6,7 @@ from .models import (
     Course, 
     PercentageDetails, 
     Students, 
-    StudentAttendance)
+    StudentAttendance,)
 from django.core.mail import send_mail
 from django.conf import settings
 from asgiref.sync import async_to_sync
@@ -47,8 +47,8 @@ def get_changed_courses(old_instance, new_instance):
 
 
 
-def cleanup_empty_entries():
-    for entry in BranchHoursDetails.objects.all():
+def cleanup_empty_entries(table_class):
+    for entry in table_class.objects.all():
         if all(getattr(entry, f'hour_{i}') in [None, ''] for i in range(1, 8)):
             entry.delete()
       
@@ -83,7 +83,8 @@ def update_course_number_of_hours(sender, instance, created, **kwargs):
                 course.number_of_hours = total_hours
                 course.save(update_fields=['number_of_hours'])
                 update_attendance_percentages_for_course_students(course)
-    cleanup_empty_entries()
+    cleanup_empty_entries(BranchHoursDetails)
+    
 
 
 @receiver(pre_delete, sender=BranchHoursDetails)
@@ -110,8 +111,36 @@ def update_course_number_of_hours_on_delete(sender, instance, **kwargs):
             update_attendance_percentages_for_course_students(course)
         except Course.DoesNotExist:
             print(f"Course with id {course_id} does not exist.")
-    cleanup_empty_entries()       
+    cleanup_empty_entries(BranchHoursDetails)      
        
+
+
+@receiver(pre_save, sender=StudentAttendance)
+def handle_student_attendance_pre_save(sender, instance, **kwargs):
+    if instance.pk:
+        try:
+            instance._previous_state = StudentAttendance.objects.get(pk=instance.pk)
+        except StudentAttendance.DoesNotExist:
+            instance._previous_state = None
+    else:
+        instance._previous_state = None
+
+@receiver(post_save, sender=StudentAttendance)
+def cleanup_student_attendance_after_save(sender, instance, created, **kwargs):
+    # Cleanup empty entries after save
+    cleanup_empty_entries(StudentAttendance)
+
+@receiver(pre_delete, sender=StudentAttendance)
+def handle_student_attendance_pre_delete(sender, instance, **kwargs):
+    instance._previous_state = instance
+
+@receiver(post_delete, sender=StudentAttendance)
+def cleanup_student_attendance_after_delete(sender, instance, **kwargs):
+    # Cleanup empty entries after delete
+    cleanup_empty_entries(StudentAttendance)
+    
+    
+
         
 #Handle sending mails when attendance of students are updated hehe
 @receiver(pre_save, sender=StudentAttendance)
@@ -157,10 +186,10 @@ def send_absence_email(instance, new_entry=False, deleted=False):
     unmarked_duty_hours = []
 
     if deleted:
-        print("\n\nTRIGGER EXECUTED, DELETED ABSENT, GOING TO SEND EMAIL\n\n")
+        # print("\n\nTRIGGER EXECUTED, DELETED ABSENT, GOING TO SEND EMAIL\n\n")
         subject = 'Absent Entry Removed'
         message = f"Dear {student.user.first_name},\n\nYour absent hours for {date} has been removed.\n\nBest regards\na10dance"
-        threading.Thread(target=send_mail_thread, args=(subject, message, [email])).start()
+        # threading.Thread(target=send_mail_thread, args=(subject, message, [email])).start()
     else:
         previous_state = instance._previous_state
 
