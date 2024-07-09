@@ -1,7 +1,12 @@
 # attendance/signals.py
-from django.db.models.signals import post_save, post_delete, pre_save
+from django.db.models.signals import post_save, post_delete, pre_save, pre_delete
 from django.dispatch import receiver
-from .models import BranchHoursDetails, Course, PercentageDetails, Students, StudentAttendance
+from .models import (
+    BranchHoursDetails, 
+    Course, 
+    PercentageDetails, 
+    Students, 
+    StudentAttendance)
 from django.core.mail import send_mail
 from django.conf import settings
 from asgiref.sync import async_to_sync
@@ -17,23 +22,66 @@ def update_attendance_percentages_for_course_students(course):
             course_percentage = ((tot_hours - hours_lost) / tot_hours) * 100
             percentage_detail.percentage_of_subject = course_percentage
             percentage_detail.save()
-            print("before print")
+            # print("before print")
             print(f"Attendance percentage for {student.user.first_name} for {course.course_name}: {course_percentage}%  (UPDATED)")
-            print("After print")
-        
+            # print("After print")
         except PercentageDetails.DoesNotExist:
             print(f"No attendance percentage record found for {student.user.first_name} for {course.course_name}")
-            
 
+def get_changed_courses(old_instance, new_instance):
+    changed_courses = []
+    for i in range(1, 8):
+        hour_field = f'hour_{i}'
+        old_course = getattr(old_instance, hour_field) if old_instance else None
+        new_course = getattr(new_instance, hour_field) if new_instance else None
+        if old_course != new_course:
+            if new_course:
+                changed_courses.append(new_course)
+            if old_course:
+                changed_courses.append(old_course)
+    return list(set(changed_courses))
 
-@receiver([post_save], sender=BranchHoursDetails)
+@receiver(pre_save, sender=BranchHoursDetails)
+def handle_branch_hours_pre_save(sender, instance, **kwargs):
+    if instance.pk:
+        try:
+            instance._previous_state = BranchHoursDetails.objects.get(pk=instance.pk)
+        except BranchHoursDetails.DoesNotExist:
+            instance._previous_state = None
+    else:
+        instance._previous_state = None
+
+@receiver(post_save, sender=BranchHoursDetails)
 def update_course_number_of_hours(sender, instance, created, **kwargs):
-    if not created:
+    old_instance = getattr(instance, '_previous_state', None)
+    changed_courses = get_changed_courses(old_instance, instance)
+
+    if changed_courses:
         branch = instance.branch
-        courses = Course.objects.filter(branch=branch)
-        
-        # Iterate through each course and update the number_of_hours
-        for course in courses:
+        for course in changed_courses:
+            print(f"\n\n{course}\n\n")
+            if course:
+                total_hours = sum([
+                    getattr(branch_hours, f'hour_{i}') == course for i in range(1, 8)
+                    for branch_hours in BranchHoursDetails.objects.filter(branch=branch)
+                ])
+                course.number_of_hours = total_hours
+                course.save(update_fields=['number_of_hours'])
+                update_attendance_percentages_for_course_students(course)
+
+@receiver(pre_delete, sender=BranchHoursDetails)
+def handle_branch_hours_pre_delete(sender, instance, **kwargs):
+    instance._previous_state = instance
+    instance._changed_course_ids = [getattr(instance, f'hour_{i}').id for i in range(1, 8) if getattr(instance, f'hour_{i}')]
+
+@receiver(post_delete, sender=BranchHoursDetails)
+def update_course_number_of_hours_on_delete(sender, instance, **kwargs):
+    changed_course_ids = getattr(instance, '_changed_course_ids', [])
+    branch = instance.branch
+    for course_id in changed_course_ids:
+        print(f"\n\n{course_id}\n\n")
+        try:
+            course = Course.objects.get(id=course_id)
             total_hours = sum([
                 getattr(branch_hours, f'hour_{i}') == course for i in range(1, 8)
                 for branch_hours in BranchHoursDetails.objects.filter(branch=branch)
@@ -41,23 +89,8 @@ def update_course_number_of_hours(sender, instance, created, **kwargs):
             course.number_of_hours = total_hours
             course.save(update_fields=['number_of_hours'])
             update_attendance_percentages_for_course_students(course)
-
-
-
-@receiver([post_delete], sender=BranchHoursDetails)
-def update_course_number_of_hours(sender, instance, **kwargs):
-    branch = instance.branch
-    courses = Course.objects.filter(branch=branch)
-    
-    # Iterate through each course and update the number_of_hours
-    for course in courses:
-        total_hours = sum([
-            getattr(branch_hours, f'hour_{i}') == course for i in range(1, 8)
-            for branch_hours in BranchHoursDetails.objects.filter(branch=branch)
-        ])
-        course.number_of_hours = total_hours
-        course.save(update_fields=['number_of_hours'])
-        update_attendance_percentages_for_course_students(course)
+        except Course.DoesNotExist:
+            print(f"Course with id {course_id} does not exist.")
         
        
        
@@ -107,8 +140,8 @@ def send_absence_email(instance, new_entry=False, deleted=False):
 
     if deleted:
         print("\n\nTRIGGER EXECUTED, DELETED ABSENT, GOING TO SEND EMAIL\n\n")
-        subject = 'Absence Record Removed'
-        message = f"Dear {student.user.first_name},\n\nYour absence record for {date} has been removed.\n\nBest regards\na10dance"
+        subject = 'Absent Entry Removed'
+        message = f"Dear {student.user.first_name},\n\nYour absent hours for {date} has been removed.\n\nBest regards\na10dance"
         threading.Thread(target=send_mail_thread, args=(subject, message, [email])).start()
     else:
         previous_state = instance._previous_state
@@ -154,17 +187,17 @@ def send_absence_email(instance, new_entry=False, deleted=False):
             if added_absences:
                 if new_entry:
                     print("\n\nTRIGGER EXECUTED, ADDED ABSENT, GOING TO SEND EMAIL\n\n")
-                    subject = 'New Absence Recorded'
+                    subject = 'Absent Marked in RSMS!'
                     message = f"Dear {student.user.first_name},\n\nYou have been marked absent on {date} for the following hours:\n" + "\n".join(added_absences) + "\n\nPlease check with your teacher if this is a mistake.\n\nBest regards\na10dance"
                 else:
                     print("\n\nTRIGGER EXECUTED, MODIFIED ABSENT, GOING TO SEND EMAIL\n\n")
-                    subject = 'Absence Record Updated'
+                    subject = 'Absent Updated in RSMS!'
                     message = f"Dear {student.user.first_name},\n\nYour attendance for {date} has been updated for the following hours:\n" + "\n".join(added_absences) + "\n\nPlease check with your teacher if this is a mistake.\n\nBest regards\na10dance"
                 email_messages.append((subject, message, email))
 
             if removed_absences:
                 print("\n\nTRIGGER EXECUTED, REMOVED ABSENT, GOING TO SEND EMAIL\n\n")
-                subject = 'Absence Record Corrected'
+                subject = 'Absent Removed in RSMS!'
                 message = f"Dear {student.user.first_name},\n\nYour attendance for {date} has been corrected(unmarked as absent) for the following hours:\n" + "\n".join(removed_absences) + "\n\nBest regards\na10dance"
                 email_messages.append((subject, message, email))
 

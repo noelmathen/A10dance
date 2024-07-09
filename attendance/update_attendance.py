@@ -1,4 +1,4 @@
-#attendance/get_attendance.py
+#attendance/update_attendance.py
 from students.models import Students
 from attendance.models import StudentAttendance, PercentageDetails, BranchHoursDetails
 from selenium import webdriver
