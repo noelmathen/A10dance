@@ -56,7 +56,8 @@ class BranchAdmin(admin.ModelAdmin):
 @admin.register(Course)
 class CourseAdmin(admin.ModelAdmin):
     list_display = ['course_name', 'course_code', 'number_of_hours', 'short_form', 'branch']
-    list_filter = ['branch']
+    list_filter = ['branch', 'branch__joining_year']
+    search_fields = ['course_code', 'course_name', 'short_form', 'semester', 'branch__branch_name', 'branch__joining_year'] 
     ordering = ['branch', 'slot']
     
     

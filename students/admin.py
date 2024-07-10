@@ -7,8 +7,8 @@ from attendance.admin import PercentageDetailsInline
 class StudentsAdmin(admin.ModelAdmin):
     list_display = ['user', 'branch'] 
     ordering = ['branch', 'user']  
-    list_filter = ['user', 'branch'] 
-    search_fields = ['user__first_name', 'branch__branch_name'] 
+    list_filter = ['user', 'branch', 'branch__joining_year'] 
+    search_fields = ['user__first_name', 'branch__branch_name', 'branch__joining_year'] 
     inlines = [PercentageDetailsInline]
     
     def delete_model(self, request, obj):
