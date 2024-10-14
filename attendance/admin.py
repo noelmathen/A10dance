@@ -7,7 +7,7 @@ from .forms import BranchHoursDetailsForm
 @admin.register(BranchHoursDetails)
 class BranchHoursDetailsAdmin(admin.ModelAdmin):
     form = BranchHoursDetailsForm
-    list_display = ['branch', 'date', 'hour_1', 'hour_2', 'hour_3', 'hour_4', 'hour_5', 'hour_6', 'hour_7', 'finished_marking']  # Display these fields in the admin list
+    list_display = ['branch', 'date', 'hour_1', 'hour_2', 'hour_3', 'hour_4', 'hour_5', 'hour_6', 'hour_7']  # Display these fields in the admin list
     ordering = ['branch', 'date']  # Order by the 'date' field in ascending order
     list_filter = ['branch', 'date' , 'branch__joining_year',]
     search_fields = ['branch', 'date']

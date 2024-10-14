@@ -50,6 +50,7 @@ update_attendance_action.short_description = "Update Attendance Details"  # Acti
 class BranchAdmin(admin.ModelAdmin):
     form = BranchAdminForm
     list_display = ['branch_name', 'joining_year', 'passout_year', 'division']
+    list_filter = ['joining_year']
     actions = [update_attendance_action]
 
 
