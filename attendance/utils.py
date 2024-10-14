@@ -1,7 +1,7 @@
 #attendance/utils.py
 from students.models import Students
 from .models import PercentageDetails
-from academia. models import Course
+from academia. models import Course, Elective
 
 def get_attendance_percentage(branch):
     students = Students.objects.filter(branch=branch)

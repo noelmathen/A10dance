@@ -1,6 +1,6 @@
 #academia/admin.py
 from django.contrib import admin, messages
-from .models import Branch, Course
+from .models import Branch, Course, Elective
 from django import forms
 from .utils import process_excel_file
 from students.utils import iterate_through_students
@@ -56,9 +56,17 @@ class BranchAdmin(admin.ModelAdmin):
 
 @admin.register(Course)
 class CourseAdmin(admin.ModelAdmin):
-    list_display = ['course_name', 'course_code', 'number_of_hours', 'short_form', 'branch']
+    list_display = ['course_name', 'course_code', 'number_of_hours', 'short_form', 'branch', 'elective']
     list_filter = ['branch', 'branch__joining_year']
-    search_fields = ['course_code', 'course_name', 'short_form', 'semester', 'branch__branch_name', 'branch__joining_year'] 
-    ordering = ['branch', 'slot']
+    search_fields = ['course_code', 'course_name', 'short_form', 'semester', 'branch__branch_name', 'branch__joining_year', 'elective'] 
+    ordering = ['branch', 'slot', 'elective']
+    
+
+@admin.register(Elective)
+class ElectiveAdmin(admin.ModelAdmin):
+    list_display = ['name']
+    list_filter = ['name']
+    search_fields = ['name']
+    ordering = ['name']
     
     

@@ -13,7 +13,6 @@ from asgiref.sync import async_to_sync
 import threading
 
 
-
 def update_attendance_percentages_for_course_students(course):
     students = Students.objects.filter(branch=course.branch)
     for student in students:
@@ -84,7 +83,9 @@ def update_course_number_of_hours(sender, instance, created, **kwargs):
                     for branch_hours in BranchHoursDetails.objects.filter(branch=branch)
                 ])
                 course.number_of_hours = total_hours
+                print("\n\n\n\nSaving course instance...")
                 course.save(update_fields=['number_of_hours'])
+                print("Course instance saved.\n\n\n\n")
                 update_attendance_percentages_for_course_students(course)
     cleanup_empty_entries(BranchHoursDetails)
     
@@ -253,4 +254,5 @@ def cleanup_student_attendance_after_delete(sender, instance, **kwargs):
 
 #         for subject, message, recipient in email_messages:
 #             threading.Thread(target=send_mail_thread, args=(subject, message, [recipient])).start()
+
 
