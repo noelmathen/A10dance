@@ -67,6 +67,8 @@ class Course(models.Model):
     
     def __str__(self):
         # return f"{self.course_name} ({self.course_code})"
+        if self.elective:
+            return f"{self.elective.name}"
         return f"{self.short_form}"
     
     

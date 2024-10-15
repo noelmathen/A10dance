@@ -161,8 +161,6 @@
 
         // Fetch branch hour details data from backend API
         document.addEventListener('DOMContentLoaded', function () {
-            // Your script here
-            // Fetch branch hour details data from backend API
             fetch(SERVER_URL + 'branch-hour-details/', {
                 method: 'GET',
                 headers: {
@@ -172,25 +170,20 @@
                 .then(response => response.json())
                 .then(data => {
                     const tableBody = document.querySelector('#branch-hour-table tbody');
-
-                    // Iterate over each branch hour details record and create table rows dynamically
                     data.forEach(record => {
                         const row = document.createElement('tr');
-
-
-
+        
                         const dateCell = document.createElement('td');
                         dateCell.textContent = record.date;
                         row.appendChild(dateCell);
-
+        
                         // Add details for each hour
                         for (let i = 1; i <= 7; i++) {
                             const hourCell = document.createElement('td');
-                            hourCell.textContent = record[`hour_${i}`] ? `${record[`hour_${i}`].short_form}` : '';
+                            hourCell.textContent = record[`hour_${i}`] ? record[`hour_${i}`].display_name : '';
                             row.appendChild(hourCell);
                         }
-
-
+        
                         tableBody.appendChild(row);
                     });
                 })

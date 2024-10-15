@@ -5,9 +5,15 @@ from academia.models import Course
 from attendance.models import Branch
 
 class CourseSerializer(serializers.ModelSerializer):
+    display_name = serializers.SerializerMethodField()
+
     class Meta:
         model = Course
-        fields = ['id', 'course_code', 'course_name', 'short_form', 'number_of_hours']
+        fields = ['id', 'course_code', 'course_name', 'short_form', 'number_of_hours', 'elective', 'display_name']
+    
+    def get_display_name(self, obj):
+        # If the course has an elective, return the elective name; otherwise, return the course short form.
+        return obj.elective.name if obj.elective else obj.short_form
 
 class StudentAttendanceSerializer(serializers.ModelSerializer):
     hour_1 = CourseSerializer()
@@ -47,7 +53,7 @@ class BranchHourDetailsSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = BranchHoursDetails
-        fields = ['branch_name', 'date', 'hour_1', 'hour_2', 'hour_3', 'hour_4', 'hour_5', 'hour_6', 'hour_7', 'finished_marking']
+        fields = ['branch_name', 'date', 'hour_1', 'hour_2', 'hour_3', 'hour_4', 'hour_5', 'hour_6', 'hour_7']
     
     def get_branch_name(self, obj):
         return f"{obj.branch.branch_name} {obj.branch.division} ({obj.branch.joining_year} - {obj.branch.passout_year})"
