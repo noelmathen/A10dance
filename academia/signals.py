@@ -1,8 +1,7 @@
 #academia/signals.py
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from .models import Course, Elective
-from attendance.models import BranchHoursDetails
+from .models import Course
 from django.db.models import Max
 
 @receiver(post_save, sender=Course)

@@ -55,6 +55,28 @@ def cleanup_empty_entries(table_class):
             entry.delete()
       
           
+@receiver(post_save, sender=Course)
+def update_percentage_details_on_course_update(sender, instance, created, **kwargs):
+    """
+    Update PercentageDetails for all students enrolled in a course whenever the course's 
+    number of hours is modified.
+    """
+    # Check if course hours were updated
+    if not created:
+        print(f"Updating PercentageDetails for course: {instance.course_name}")
+        update_attendance_percentages_for_course_students(instance)
+    
+
+@receiver(pre_save, sender=BranchHoursDetails)
+def handle_branch_hours_pre_save(sender, instance, **kwargs):
+    if instance.pk:
+        try:
+            instance._previous_state = BranchHoursDetails.objects.get(pk=instance.pk)
+        except BranchHoursDetails.DoesNotExist:
+            instance._previous_state = None
+    else:
+        instance._previous_state = None
+
             
 @receiver(pre_save, sender=BranchHoursDetails)
 def handle_branch_hours_pre_save(sender, instance, **kwargs):
