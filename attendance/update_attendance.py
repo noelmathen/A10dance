@@ -20,7 +20,7 @@ def get_attendance_percentage(branch):
         percentage_details = PercentageDetails.objects.filter(student=student)
         for percentage_detail in percentage_details:
             tot_hours = Course.objects.get(course_code=percentage_detail.course.course_code).number_of_hours
-            hours_lost = percentage_detail.hours_lost_with_duty
+            hours_lost = percentage_detail.hours_lost_without_duty
             if tot_hours > 0:
                 course_percentage = ((tot_hours - hours_lost) / tot_hours) * 100
             else:
