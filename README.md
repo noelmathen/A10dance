@@ -1,82 +1,98 @@
-**Project Title:** Student Attendance and Performance Tracking System
+# A10dance
 
-**Project Overview:**
-The Student Attendance and Performance Tracking System is a web application designed to streamline the management of student attendance records and provide insights into student performance based on attendance data. The system is developed using Django, a high-level Python web framework, and incorporates features such as data scraping, data insertion, RESTful APIs, and user authentication.
+[![Watch the Walkthrough](https://img.youtube.com/vi/4Y2YtqheJu4/maxresdefault.jpg)](https://www.youtube.com/watch?v=4Y2YtqheJu4&ab_channel=NoelMathenEldho)
+**Click to watch the video walkthrough of A10dance!**
 
-**Key Features:**
+**A10dance** is a powerful backend system designed to automate and enhance attendance tracking and management for educational institutions. Leveraging **Django**, **Selenium**, and other advanced technologies, it supports multi-branch tracking, email notifications, and attendance prediction, ensuring a seamless experience for administrators and students alike.
 
-1. **User Authentication:**
-   - Users can log in using their credentials to access the system.
-   - Authentication ensures that only authorized users can view and interact with the attendance and performance data.
+---
 
-2. **Student Attendance Management:**
-   - The system allows administrators to input and manage student attendance records.
-   - Data scraping techniques are used to extract attendance information from external sources, such as web pages.
-   - Attendance records are stored in a database and can be accessed by authorized users for analysis.
+## 🚀 Features
 
-3. **Attendance Statistics:**
-   - Users can view attendance statistics for individual students and courses.
-   - Statistics include the percentage of attendance, hours missed, and performance trends over time.
-   - APIs are provided to fetch attendance data in a structured format for integration with other systems.
+### **Core Features**
+- **Automated Attendance Scraping**: Uses Selenium to scrape attendance details directly from institutional systems.
+- **Dynamic Attendance Percentage Calculation**: Real-time tracking and updates whenever attendance or course hours are modified.
+- **Elective Courses Handling**:
+  - Automatically detects elective courses.
+  - Synchronizes attendance and hours between main and elective courses.
+  - Displays user-friendly elective names in the frontend instead of technical course codes.
+- **Signals for Automation**: 
+  - Updates `PercentageDetails` automatically when models like `Course`, `BranchHourDetails`, or `StudentAttendance` are modified.
 
-4. **Branch and Course Management:**
-   - Administrators can manage branches and courses offered by the institution.
-   - Each branch can have multiple courses, and attendance data is associated with specific courses.
+---
 
-5. **Prediction of Performance:**
-   - The system provides a feature to predict student performance based on attendance data.
-   - Predictions are made using machine learning algorithms to estimate the percentage of attendance and identify students at risk of academic issues.
+### **Enhanced Features**
+1. **Multiple Branch Tracking**:
+   - Supports attendance management for multiple branches.
+   - Tracks and updates attendance percentages for students across branches seamlessly.
 
-6. **Data Visualization:**
-   - Attendance data and performance metrics are presented using visualizations such as tables and charts.
-   - Visualizations help users understand trends and patterns in attendance and performance data more effectively.
+2. **Duty Attendance and Leave Consideration**:
+   - Differentiates between regular absences, duty leave, and approved leaves.
+   - Adjusts attendance percentages accurately based on duty hours or leaves granted to students.
 
-**Technical Components:**
+3. **Email Notifications for Attendance Changes**:
+   - Sends automated emails to students whenever there’s an update in their attendance:
+     - Marked absent
+     - Duty attendance added or removed
+     - Absent changed to present
+   - Ensures transparency and immediate communication with students.
 
-1. **Django Web Framework:**
-   - The system is built using Django, which provides a robust architecture for web application development.
-   - Django's ORM (Object-Relational Mapping) is used to interact with the database and manage data models.
+4. **Attendance Percentage Prediction**:
+   - Predicts future attendance percentages based on:
+     - Current total hours.
+     - Hours already missed.
+     - Estimated future absences.
+   - Helps students plan their attendance to avoid falling below the required threshold.
 
-2. **Data Scraping with Selenium and BeautifulSoup:**
-   - Selenium is used for web scraping to extract attendance information from external web pages.
-   - BeautifulSoup is employed for parsing HTML content and extracting relevant data from web pages.
+---
 
-3. **RESTful APIs:**
-   - RESTful APIs are implemented to expose endpoints for accessing attendance and performance data.
-   - APIs allow integration with other systems and enable data retrieval in a structured format.
+### **Frontend Integration**
+- **Dynamic Data Fetching**:
+  - APIs provide real-time attendance data to the frontend.
+  - Automatically updates tables to reflect elective names, attendance percentages, and predictions.
+- **Visual Representation**:
+  - Displays attendance statistics in a clean, intuitive interface.
+  - Screenshots (to be added): 
+    - [Dashboard Overview](screenshots/dashboard_overview.png)
+    - [Course Details](screenshots/course_details.png)
+    - [Email Notification Sample](screenshots/email_notification_sample.png)
 
-4. **User Authentication and Authorization:**
-   - User authentication and authorization are implemented to ensure secure access to the system.
-   - Only authenticated users with appropriate permissions can view and manage attendance data.
+---
 
-5. **Machine Learning for Prediction:**
-   - Machine learning algorithms may be employed for predicting student performance based on attendance data.
-   - Predictive models analyze historical attendance patterns to forecast future performance metrics.
+## 💻 Technologies Used
 
-**Project Workflow:**
+- **Django**: Backend framework for logic and database management.
+- **Selenium**: For scraping attendance data.
+- **PostgreSQL**: Database solution for robust data handling.
+- **Django REST Framework**: For creating APIs to serve attendance data to the frontend.
+- **HTML + JavaScript**: Frontend technologies for dynamic user interaction.
+- **SMTP Email Integration**: Sends real-time email notifications.
 
-1. **Data Collection:**
-   - Attendance data is collected from external sources using web scraping techniques.
-   - Data is parsed and processed to extract relevant information such as student details, course codes, and attendance records.
+---
 
-2. **Data Insertion and Management:**
-   - Extracted data is inserted into the database using Django's ORM.
-   - Attendance records are associated with specific students, courses, and dates for easy retrieval and analysis.
+## 📖 How It Works
 
-3. **Analysis and Visualization:**
-   - Attendance data is analyzed to generate statistics and visualize performance trends.
-   - Visualizations such as attendance tables, charts, and graphs are used to present data in a meaningful way.
+1. **Attendance Updates**:
+   - Uses **signals** (`pre_save`, `post_save`, `pre_delete`, `post_delete`) to automatically:
+     - Recalculate attendance percentages.
+     - Sync hours and details across `BranchHourDetails` and `Course` models.
+   - Tracks changes in attendance and generates real-time updates.
 
-4. **Prediction and Reporting:**
-   - Predictive models may be applied to forecast student performance based on attendance data.
-   - Reports and insights are generated to identify students at risk and provide recommendations for intervention.
+2. **Email Notification System**:
+   - Integrated with Django's email framework.
+   - Notifies students immediately when their attendance records change.
 
-5. **User Interface and Access:**
-   - The system provides a user-friendly interface for accessing attendance and performance data.
-   - Different user roles and permissions are implemented to control access to sensitive information.
+3. **Attendance Prediction**:
+   - Uses the following formula to estimate future percentages:
+     ```
+     Predicted Percentage = ((Current Total Hours - Total Missed Hours - Estimated Future Missed Hours) / Current Total Hours) * 100
+     ```
+   - Displays predictions in the frontend for proactive planning.
 
-**Conclusion:**
-The Student Attendance and Performance Tracking System offers a comprehensive solution for managing and analyzing student attendance data. By leveraging web scraping, data visualization, and machine learning techniques, the system enables educational institutions to monitor student performance effectively and intervene when necessary to support student success.
+4. **Frontend Integration**:
+   - APIs provide:
+     - Branch and course-level attendance details.
+     - Attendance percentages and predictions.
+   - Frontend dynamically updates to reflect changes in real-time.
 
---- 
-
+---
