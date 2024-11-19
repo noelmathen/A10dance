@@ -1,6 +1,6 @@
 # A10dance
 
-[![Watch the Walkthrough](https://img.youtube.com/vi/4Y2YtqheJu4/maxresdefault.jpg)](https://www.youtube.com/watch?v=4Y2YtqheJu4&ab_channel=NoelMathenEldho)
+[![Watch the Walkthrough](https://img.youtube.com/vi/4Y2YtqheJu4/maxresdefault.jpg)](https://www.youtube.com/watch?v=4Y2YtqheJu4&ab_channel=NoelMathenEldho){:target="_blank"}
 **Click to watch the video walkthrough of A10dance!**
 
 **A10dance** is a powerful backend system designed to automate and enhance attendance tracking and management for educational institutions. Leveraging **Django**, **Selenium**, and other advanced technologies, it supports multi-branch tracking, email notifications, and attendance prediction, ensuring a seamless experience for administrators and students alike.
@@ -101,3 +101,30 @@
    - Frontend dynamically updates to reflect changes in real-time.
 
 ---
+
+## 📖 Support
+For any issues or inquiries, please contact [noelmathen03@gmail.com].
+
+---
+
+## Screenshots of project
+
+Index Page![Screenshot 1](https://github.com/noelmathen/A10dance/blob/main/Walkthoughs%20and%20Screenshots/Screenshot%201.jpg)
+
+Student Leave and Percentage Details Page 1![Screenshot 2](https://github.com/noelmathen/A10dance/blob/main/Walkthoughs%20and%20Screenshots/Screenshot%202.jpg)
+
+Student Percentage Details with predict percentage feature![Screenshot 3](https://github.com/noelmathen/A10dance/blob/main/Walkthoughs%20and%20Screenshots/Screenshot%203.jpg)
+
+Student Percentage Details filtering feature![Screenshot 4](https://github.com/noelmathen/A10dance/blob/main/Walkthoughs%20and%20Screenshots/Screenshot%204.jpg)
+
+Class Attendance Details![Screenshot 5](https://github.com/noelmathen/A10dance/blob/main/Walkthoughs%20and%20Screenshots/Screenshot%205.jpg)
+
+Class Attendance Details 2![Screenshot 6](https://github.com/noelmathen/A10dance/blob/main/Walkthoughs%20and%20Screenshots/Screenshot%206.jpg)
+
+Admin Page - Branch Details![Screenshot 7](https://github.com/noelmathen/A10dance/blob/main/Walkthoughs%20and%20Screenshots/Screenshot%207.jpg)
+
+Admin Page - Course Details![Screenshot 8](https://github.com/noelmathen/A10dance/blob/main/Walkthoughs%20and%20Screenshots/Screenshot%208.jpg)
+
+Admin Page - Branch Hours Details![Screenshot 9](https://github.com/noelmathen/A10dance/blob/main/Walkthoughs%20and%20Screenshots/Screenshot%209.jpg)
+
+Admin Page - Branch Hours Details Editing Options![Screenshot 10](https://github.com/noelmathen/A10dance/blob/main/Walkthoughs%20and%20Screenshots/Screenshot%2010.jpg)
