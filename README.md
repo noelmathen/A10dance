@@ -1,6 +1,6 @@
 # A10dance
 
-[![Watch the Walkthrough](https://img.youtube.com/vi/4Y2YtqheJu4/maxresdefault.jpg)](https://www.youtube.com/watch?v=4Y2YtqheJu4&ab_channel=NoelMathenEldho){:target="_blank"}
+[![Watch the Walkthrough](https://img.youtube.com/vi/4Y2YtqheJu4/maxresdefault.jpg)](https://www.youtube.com/watch?v=4Y2YtqheJu4&ab_channel=NoelMathenEldho)
 **Click to watch the video walkthrough of A10dance!**
 
 **A10dance** is a powerful backend system designed to automate and enhance attendance tracking and management for educational institutions. Leveraging **Django**, **Selenium**, and other advanced technologies, it supports multi-branch tracking, email notifications, and attendance prediction, ensuring a seamless experience for administrators and students alike.
@@ -56,10 +56,6 @@
   - Automatically updates tables to reflect elective names, attendance percentages, and predictions.
 - **Visual Representation**:
   - Displays attendance statistics in a clean, intuitive interface.
-  - Screenshots (to be added):
-    - [Dashboard Overview](screenshots/dashboard_overview.png)
-    - [Course Details](screenshots/course_details.png)
-    - [Email Notification Sample](screenshots/email_notification_sample.png)
 
 ---
 
@@ -102,12 +98,12 @@
 
 ---
 
-## 📖 Support
+## ✉️ Support
 For any issues or inquiries, please contact [noelmathen03@gmail.com].
 
 ---
 
-## Screenshots of project
+## 📷 Screenshots of Project
 
 Index Page![Screenshot 1](https://github.com/noelmathen/A10dance/blob/main/Walkthoughs%20and%20Screenshots/Screenshot%201.jpg)
 
